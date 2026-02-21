@@ -3,7 +3,7 @@ import { DiamondCardSkeleton } from "@/components/inventory/DiamondCardSkeleton"
 import { useAuth } from "@/context/AuthContext";
 import { useDiamondFilters } from "@/hooks/useDiamondFilters";
 import { CLARITIES, COLORS, FINISHES, SHAPES } from "@/types/diamond.types";
-import { Ionicons } from "@expo/vector-icons";
+import { Fontisto, Ionicons } from "@expo/vector-icons";
 import { Slider } from "@miblanchard/react-native-slider";
 import { Redirect } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -362,10 +362,11 @@ export default function InventoryScreen() {
                             <Text className="text-sm text-yellow-600 font-medium">
                                 {getCurrentSortLabel()}
                             </Text>
-                            <Ionicons
-                                name="chevron-down-outline"
-                                size={16}
+                            <Fontisto
+                                name="arrow-swap"
+                                size={12}
                                 color="#CA8A04"
+                                className="rotate-90"
                             />
                         </TouchableOpacity>
                     </View>
