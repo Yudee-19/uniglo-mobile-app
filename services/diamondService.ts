@@ -205,6 +205,9 @@ export const searchDiamonds = async (
         const endpoint = isAuthenticated
             ? "/diamonds/search"
             : "/diamonds/safe";
+        console.log(
+            `Making API request to: ${API_BASE_URL}${endpoint}?${queryParams.toString()}`,
+        );
         const response = await axios.get<ApiResponse<Diamond | PublicDiamond>>(
             `${API_BASE_URL}${endpoint}?${queryParams.toString()}`,
         );

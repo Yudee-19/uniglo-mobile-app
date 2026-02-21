@@ -73,6 +73,8 @@ export interface FilterState {
     isNatural?: boolean;
     colorType?: "white" | "fancy";
     searchTerm?: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
 }
 
 export const SHAPES: { value: DiamondShape; label: string }[] = [

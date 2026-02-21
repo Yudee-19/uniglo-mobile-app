@@ -30,6 +30,8 @@ const initialFilterState: FilterState = {
     isNatural: undefined,
     colorType: undefined,
     searchTerm: undefined,
+    sortBy: undefined,
+    sortOrder: undefined,
 };
 
 export const useDiamondFilters = () => {
@@ -39,15 +41,37 @@ export const useDiamondFilters = () => {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
-    const [sortBy, setSortBy] = useState("createdAt");
-    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+    const hasActiveFilters = useCallback(() => {
+        return (
+            filters.shape.length > 0 ||
+            filters.caratRange[0] !== 1.2 ||
+            filters.caratRange[1] !== 5.0 ||
+            filters.color.length > 0 ||
+            filters.clarity.length > 0 ||
+            filters.cutGrade.length > 0 ||
+            filters.polish.length > 0 ||
+            filters.symmetry.length > 0 ||
+            filters.fluorescence.length > 0 ||
+            filters.lab.length > 0 ||
+            filters.priceRange[0] !== 0 ||
+            filters.priceRange[1] !== 1000000 ||
+            filters.pricePerCaratRange[0] !== 0 ||
+            filters.pricePerCaratRange[1] !== 1000000 ||
+            filters.discountRange[0] !== -100 ||
+            filters.discountRange[1] !== 100 ||
+            filters.isNatural !== undefined ||
+            filters.colorType !== undefined ||
+            filters.searchTerm !== undefined ||
+            filters.sortBy !== undefined ||
+            filters.sortOrder !== undefined
+        );
+    }, [filters]);
 
     const buildParams = useCallback((): DiamondParams => {
-        return {
+        const params: DiamondParams = {
             page,
             limit: 25,
-            sortBy,
-            sortOrder,
             shape: filters.shape.length > 0 ? filters.shape : undefined,
             color: filters.color.length > 0 ? filters.color : undefined,
             clarity: filters.clarity.length > 0 ? filters.clarity : undefined,
@@ -127,7 +151,17 @@ export const useDiamondFilters = () => {
             colorType: filters.colorType,
             searchTerm: filters.searchTerm,
         };
-    }, [filters, page, sortBy, sortOrder]);
+
+        // Only add sort params if they are defined
+        if (filters.sortBy) {
+            params.sortBy = filters.sortBy;
+        }
+        if (filters.sortOrder) {
+            params.sortOrder = filters.sortOrder;
+        }
+
+        return params;
+    }, [filters, page]);
 
     const loadDiamonds = useCallback(async () => {
         setLoading(true);
@@ -183,13 +217,10 @@ export const useDiamondFilters = () => {
         page,
         setPage,
         totalCount,
-        sortBy,
-        setSortBy,
-        sortOrder,
-        setSortOrder,
         resetFilters,
         toggleFilter,
         updateFilter,
         loadDiamonds,
+        hasActiveFilters: hasActiveFilters(),
     };
 };

@@ -1,14 +1,43 @@
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Platform } from "react-native";
+import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+function AppHeader() {
+    return (
+        <View className="flex-row items-center justify-between px-4 py-3 bg-white ">
+            {/* Center - Logo */}
+            <View className="flex-row items-center gap-2">
+                <Image
+                    source={require("@/assets/images/logo.png")}
+                    className="w-10 h-10 "
+                    resizeMode="contain"
+                />
+                <Text className=" font-loraBold text-xl tracking-widest text-primary-purple ">
+                    UNIGLO DIAMONDS
+                </Text>
+            </View>
+
+            {/* Right - Cart & Notification */}
+            <View className="flex-row items-center gap-3">
+                <TouchableOpacity className="w-9 h-9 items-center justify-center">
+                    <Ionicons name="cart-outline" size={24} color="#49214c" />
+                </TouchableOpacity>
+                <TouchableOpacity className="w-9 h-9 items-center justify-center">
+                    <Ionicons name="person-outline" size={24} color="#49214c" />
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+}
 
 export default function TabsLayout() {
     const { isAuthenticated } = useAuth();
 
     return (
-        <SafeAreaView className="flex-1 ">
+        <SafeAreaView className="flex-1">
+            <AppHeader />
             <Tabs
                 screenOptions={{
                     headerShown: false,
@@ -16,11 +45,14 @@ export default function TabsLayout() {
                     tabBarInactiveTintColor: "#9CA3AF",
                     tabBarStyle: {
                         backgroundColor: "#FFFFFF",
-                        borderTopWidth: 1,
-                        borderTopColor: "#E5E7EB",
+                        borderTopWidth: 0,
                         height: Platform.OS === "ios" ? 88 : 60,
                         paddingTop: 4,
                         paddingBottom: Platform.OS === "ios" ? 28 : 8,
+                        elevation: 0,
+                        // shadowOffset: { width: 0, height: 0 },
+                        // shadowOpacity: 0,
+                        // shadowRadius: 0,
                     },
                     tabBarLabelStyle: {
                         fontSize: 12,
@@ -45,7 +77,6 @@ export default function TabsLayout() {
                         tabPress: (e) => {
                             if (!isAuthenticated) {
                                 e.preventDefault();
-                                // Optionally show a toast or alert
                                 alert("Please login to access Inventory");
                             }
                         },
@@ -82,7 +113,6 @@ export default function TabsLayout() {
                         tabPress: (e) => {
                             if (!isAuthenticated) {
                                 e.preventDefault();
-                                // Optionally show a toast or alert
                                 alert("Please login to access Operations");
                             }
                         },
