@@ -4,7 +4,7 @@ import { router, Tabs } from "expo-router";
 import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-function AppHeader() {
+export function AppHeader() {
     return (
         <View className="flex-row items-center justify-between px-4 py-3 bg-white">
             {/* Center - Logo */}
