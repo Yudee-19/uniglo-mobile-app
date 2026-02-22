@@ -11,6 +11,20 @@ const apiClient = axios.create({
     },
 });
 
+// // Request Interceptor - Log access token if present
+// apiClient.interceptors.request.use(
+//     (config) => {
+//         const token = config.headers?.Authorization;
+//         if (token) {
+//             console.log("Access Token:", token);
+//         } else {
+//             console.log("No access token found in headers.");
+//         }
+//         return config;
+//     },
+//     (error) => Promise.reject(error),
+// );
+
 // Response Interceptor
 apiClient.interceptors.response.use(
     (response: AxiosResponse) => {

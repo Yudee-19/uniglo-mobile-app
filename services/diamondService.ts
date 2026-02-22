@@ -1,3 +1,11 @@
+import {
+    DiamondAvailability,
+    DiamondClarity,
+    DiamondColor,
+    DiamondCut,
+    DiamondLab,
+    DiamondShape,
+} from "@/types/diamond.types";
 import axios from "axios";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
@@ -41,29 +49,101 @@ export interface DiamondParams {
 }
 
 export interface Diamond {
+    // --- Identity & Meta ---
     _id: string;
     stockRef: string;
-    shape: string;
-    weight: number;
-    color: string;
-    clarity: string;
-    cutGrade: string;
-    polish: string;
-    symmetry: string;
-    fluorescenceIntensity: string;
-    lab: string;
-    priceListUSD: number;
-    pricePerCts: number;
-    discPerc: number;
+    InternalStockRefKey: number;
+    availability: DiamondAvailability | string; // e.g., "M"
+    source: string;
+
+    // --- Basic Specs ---
+    shape: DiamondShape | string; // e.g., "RD"
+    weight: number; // Carat weight
+    color: DiamondColor | string; // e.g., "E", "D", "F"
+    clarity: DiamondClarity | string; // e.g., "SI1", "VS2"
+    shade: string;
+
+    // --- Cut & Finish ---
+    cutGrade: DiamondCut | string; // e.g., "EX"
+    polish: DiamondCut | string; // e.g., "EX", "VG"
+    symmetry: DiamondCut | string; // e.g., "EX"
+
+    // --- Fluorescence ---
+    // Updated based on data seeing "NON", "STG", "FNT"
+    fluorescenceIntensity: "NON" | "FNT" | "MED" | "STG" | "VSL" | string;
+    fluorescenceColor: string; // e.g., "Blue" or ""
+
+    // --- Dimensions & Proportions ---
+    measurements: string; // e.g., "4.72-4.74x2.89"
     length: number;
     width: number;
     height: number;
     depthPerc: number;
     tablePerc: number;
-    measurements: string;
-    webLink: string;
-    availability: string;
+    crownAngle: number;
+    crownHeight: number;
+    pavalionAngle: number; // Note: API typo matches this spelling
+    pavalionDepth: number; // Note: API typo matches this spelling
+
+    // --- Girdle & Culet ---
+    girdle: string; // e.g., "MED to STK"
+    girdleThin: string;
+    girdlePerc: number;
+    girdleCondition: string;
+    culetSize: string;
+    culetCondition: string;
+
+    // --- Certification & Lab ---
+    lab: DiamondLab | string; // e.g., "GIA"
     certiNo: string;
+    certIssueDate: string; // ISO Date String
+    certComment: string;
+    laserInscription: string; // "Y" or "N"
+
+    // --- Pricing ---
+    priceListUSD: number;
+    pricePerCts: number;
+    discPerc: number;
+    cashDiscPerc: number;
+    cashDiscPrice: number;
+
+    // --- Inclusions & Comments ---
+    keyToSymbols: string[]; // e.g., ["Crystal", "Cloud"]
+    milky: string;
+    blackinclusion: string;
+    eyeClean: string;
+    memberComment: string;
+    handA: string; // Hearts and Arrows
+    identificationMarks: string;
+    enhancements: string;
+    treatment: string;
+
+    // --- Fancy Color Details (If applicable) ---
+    origin: string;
+    fancyColor: string;
+    fancyIntensity: string;
+    fancyOvertone: string;
+
+    // --- Location & Logistics ---
+    city: string;
+    state: string;
+    country: string; // e.g., "ITALY"
+
+    // --- Media ---
+    webLink: string; // Image URL
+    videoLink: string; // Video URL
+
+    // --- Pairing ---
+    pairStockRef: string;
+    isMatchedPairSeparable: boolean;
+
+    // --- System Timestamps ---
+    __v: number;
+    createdAt: string; // ISO Date String
+    updatedAt: string; // ISO Date String
+
+    // --- Similar Diamonds ---
+    similar_diamonds?: string[];
 }
 
 export interface PublicDiamond {
@@ -222,6 +302,33 @@ export const searchDiamonds = async (
         };
     } catch (error) {
         console.error("Error searching diamonds:", error);
+        throw error;
+    }
+};
+
+export const fetchDiamondById = async (
+    id: string,
+): Promise<{ diamond: Diamond; similarDiamonds: string[] }> => {
+    try {
+        const response = await axios.get<ApiResponse<Diamond>>(
+            `${API_BASE_URL}/diamonds/search?searchTerm=${encodeURIComponent(id)}`,
+        );
+        const result = response.data;
+
+        if (!result.success) {
+            throw new Error(result.message || "Failed to fetch diamond");
+        }
+
+        if (Array.isArray(result.data) && result.data.length > 0) {
+            return {
+                diamond: result.data[0],
+                similarDiamonds: (result.data[0] as any).similar_diamonds || [],
+            };
+        }
+
+        throw new Error("Diamond not found");
+    } catch (error) {
+        console.error("Error fetching diamond by id:", error);
         throw error;
     }
 };

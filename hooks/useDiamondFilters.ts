@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from "react";
 
 const initialFilterState: FilterState = {
     shape: [],
-    caratRange: [1.2, 5.0],
+    caratRange: [0.1, 10.99],
     color: [],
     clarity: [],
     cutGrade: [],
@@ -45,8 +45,8 @@ export const useDiamondFilters = () => {
     const hasActiveFilters = useCallback(() => {
         return (
             filters.shape.length > 0 ||
-            filters.caratRange[0] !== 1.2 ||
-            filters.caratRange[1] !== 5.0 ||
+            filters.caratRange[0] !== 0.1 ||
+            filters.caratRange[1] !== 10.99 ||
             filters.color.length > 0 ||
             filters.clarity.length > 0 ||
             filters.cutGrade.length > 0 ||
@@ -86,9 +86,11 @@ export const useDiamondFilters = () => {
                     : undefined,
             lab: filters.lab.length > 0 ? filters.lab : undefined,
             minCarat:
-                filters.caratRange[0] > 1.2 ? filters.caratRange[0] : undefined,
+                filters.caratRange[0] > 0.1 ? filters.caratRange[0] : undefined,
             maxCarat:
-                filters.caratRange[1] < 5.0 ? filters.caratRange[1] : undefined,
+                filters.caratRange[1] < 10.99
+                    ? filters.caratRange[1]
+                    : undefined,
             minPrice:
                 filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
             maxPrice:

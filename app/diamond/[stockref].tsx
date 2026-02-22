@@ -1,80 +1,124 @@
-import { useAuth } from "@/context/AuthContext";
-import {
-    Diamond,
-    PublicDiamond,
-    searchDiamonds,
-} from "@/services/diamondService";
+import { Diamond, fetchDiamondById } from "@/services/diamondService";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    Image,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+// ─── Helper Components ────────────────────────────────────────────────────────
 
 function DetailRow({
     label,
     value,
 }: {
     label: string;
-    value?: string | number;
+    value?: string | number | null;
 }) {
-    if (!value) return null;
     return (
-        <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
-            <Text className="text-sm text-gray-500 font-lato">{label}</Text>
-            <Text className="text-sm font-latoBold text-gray-900">{value}</Text>
+        <View className="flex-row border-b border-gray-100">
+            <View className="flex-1 py-2 px-3 border-r border-gray-100">
+                <Text className="text-xs text-gray-500 font-lato">{label}</Text>
+            </View>
+            <View className="flex-1 py-2 px-3">
+                <Text className="text-xs font-latoBold text-gray-800 text-right">
+                    {value ?? "-"}
+                </Text>
+            </View>
+        </View>
+    );
+}
+
+function SectionTable({
+    title,
+    rows,
+}: {
+    title: string;
+    rows: { label: string; value?: string | number | null }[];
+}) {
+    return (
+        <View className="mb-4 border border-gray-200 rounded-sm overflow-hidden">
+            <View className="bg-[#26062b] px-4 py-2">
+                <Text className="text-white text-sm font-latoBold uppercase tracking-wide">
+                    {title}
+                </Text>
+            </View>
+            <View className="bg-white">
+                {rows.map((row, idx) => (
+                    <DetailRow key={idx} label={row.label} value={row.value} />
+                ))}
+            </View>
+        </View>
+    );
+}
+
+function InfoCard({
+    icon,
+    title,
+    subtitle,
+}: {
+    icon: string;
+    title: string;
+    subtitle: string;
+}) {
+    return (
+        <View className="flex-1 border border-gray-200 rounded-lg p-3 gap-1">
+            <Ionicons name={icon as any} size={18} color="#26062b" />
+            <Text className="text-xs text-gray-500 font-lato mt-1">
+                {title}
+            </Text>
+            <Text className="text-sm font-latoBold text-gray-900">
+                {subtitle}
+            </Text>
         </View>
     );
 }
 
 function DiamondDetailSkeleton() {
     return (
-        <View className="flex-1 bg-white">
-            <View className="w-full h-64 bg-gray-200 animate-pulse" />
-            <View className="p-4 gap-3">
-                <View className="h-7 bg-gray-200 rounded animate-pulse w-3/4" />
-                <View className="h-5 bg-gray-200 rounded animate-pulse w-1/2" />
-                <View className="h-5 bg-gray-200 rounded animate-pulse w-2/3" />
-                <View className="h-5 bg-gray-200 rounded animate-pulse w-1/3" />
-                <View className="h-5 bg-gray-200 rounded animate-pulse w-1/2" />
-            </View>
+        <View className="flex-1 bg-white items-center justify-center">
+            <ActivityIndicator size="large" color="#49214c" />
+            <Text className="text-gray-500 font-lato mt-3 text-sm">
+                Loading Diamond Details...
+            </Text>
         </View>
     );
 }
 
+// ─── Main Screen ─────────────────────────────────────────────────────────────
+
 export default function DiamondDetailScreen() {
     const { stockref } = useLocalSearchParams<{ stockref: string }>();
-    const { isAuthenticated } = useAuth();
     const router = useRouter();
-    const [diamond, setDiamond] = useState<Diamond | PublicDiamond | null>(
-        null,
-    );
+
+    const [diamond, setDiamond] = useState<Diamond | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchDiamond = async () => {
+        const loadDiamond = async () => {
             if (!stockref) return;
             setLoading(true);
             setError(null);
             try {
-                const result = await searchDiamonds(
-                    { searchTerm: stockref, limit: 1 },
-                    isAuthenticated,
+                const result = await fetchDiamondById(
+                    decodeURIComponent(stockref),
                 );
-                if (result.data.length > 0) {
-                    setDiamond(result.data[0]);
-                } else {
-                    setError("Diamond not found");
-                }
+                setDiamond(result.diamond);
             } catch (err) {
                 setError("Failed to load diamond details");
             } finally {
                 setLoading(false);
             }
         };
-
-        fetchDiamond();
-    }, [stockref, isAuthenticated]);
+        loadDiamond();
+    }, [stockref]);
 
     return (
         <SafeAreaView className="flex-1 bg-white">
@@ -86,26 +130,30 @@ export default function DiamondDetailScreen() {
                 >
                     <Ionicons name="arrow-back" size={20} color="#49214c" />
                 </TouchableOpacity>
-                <Text className="text-lg font-latoBold text-primary-purple flex-1">
+                <Text
+                    className="text-base font-latoBold text-[#49214c] flex-1"
+                    numberOfLines={1}
+                >
                     {stockref}
                 </Text>
             </View>
 
+            {/* Content */}
             {loading ? (
                 <DiamondDetailSkeleton />
             ) : error || !diamond ? (
-                <View className="flex-1 items-center justify-center gap-3">
+                <View className="flex-1 items-center justify-center gap-3 px-6">
                     <Ionicons
                         name="alert-circle-outline"
                         size={48}
                         color="#9CA3AF"
                     />
-                    <Text className="text-gray-500 font-lato text-base">
+                    <Text className="text-gray-500 font-lato text-base text-center">
                         {error ?? "Diamond not found"}
                     </Text>
                     <TouchableOpacity
                         onPress={() => router.back()}
-                        className="px-6 py-2 bg-primary-purple rounded-full"
+                        className="px-6 py-2 bg-[#49214c] rounded-full mt-2"
                     >
                         <Text className="text-white font-latoBold">
                             Go Back
@@ -113,9 +161,12 @@ export default function DiamondDetailScreen() {
                     </TouchableOpacity>
                 </View>
             ) : (
-                <ScrollView className="flex-1">
-                    {/* Diamond Image */}
-                    <View className="w-full h-64 bg-gray-50 items-center justify-center">
+                <ScrollView
+                    className="flex-1"
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* ── Diamond Image ── */}
+                    <View className="w-full aspect-square bg-gray-50 items-center justify-center border-b border-gray-100">
                         {diamond.webLink ? (
                             <Image
                                 source={{ uri: diamond.webLink }}
@@ -125,98 +176,289 @@ export default function DiamondDetailScreen() {
                         ) : (
                             <Ionicons
                                 name="diamond-outline"
-                                size={80}
+                                size={100}
                                 color="#E5E7EB"
                             />
                         )}
                     </View>
 
-                    {/* Title */}
-                    <View className="px-4 pt-4 pb-2 border-b border-gray-100">
-                        <Text className="text-xl font-latoBold text-primary-purple">
-                            {diamond.shape} {diamond.weight} CT {diamond.color}{" "}
-                            {diamond.clarity} {diamond.cutGrade}
-                        </Text>
-                        <Text className="text-sm text-gray-500 font-lato mt-1">
-                            {diamond.stockRef} • {diamond.lab}
-                        </Text>
-                    </View>
-
-                    {/* Price (authenticated only) */}
-                    {"priceListUSD" in diamond && (
-                        <View className="px-4 py-3 bg-yellow-50 mx-4 mt-4 rounded-lg border border-yellow-200">
-                            <Text className="text-xs text-yellow-700 font-lato mb-1">
-                                LIST PRICE
+                    <View className="px-4 pt-4">
+                        {/* ── Title & Subtitle ── */}
+                        <View className="mb-1">
+                            <Text className="text-xs text-gray-400 font-lato uppercase tracking-widest mb-1">
+                                Diamond Details
                             </Text>
-                            <Text className="text-2xl font-latoBold text-primary-purple">
-                                ${diamond.priceListUSD?.toLocaleString()}
-                            </Text>
-                            <Text className="text-sm text-gray-500 font-lato mt-1">
-                                ${diamond.pricePerCts?.toLocaleString()} / ct
-                                {"discPerc" in diamond && diamond.discPerc && (
-                                    <Text className="text-green-600">
-                                        {" "}
-                                        • {diamond.discPerc}% disc
-                                    </Text>
-                                )}
+                            <Text className="text-xl font-latoBold text-gray-900">
+                                {diamond.shape} {diamond.weight} ct.{" "}
+                                {diamond.cutGrade} {diamond.color}{" "}
+                                {diamond.clarity}
                             </Text>
                         </View>
-                    )}
 
-                    {/* Specifications */}
-                    <View className="px-4 py-2 mt-4">
-                        <Text className="text-sm font-latoBold text-gray-400 mb-2 uppercase tracking-widest">
-                            Specifications
+                        {/* ── Price ── */}
+                        {diamond.priceListUSD ? (
+                            <View className="flex-row items-baseline gap-2 mb-4">
+                                <Text className="text-lg font-latoBold text-gray-900">
+                                    ${diamond.priceListUSD.toLocaleString()} USD
+                                </Text>
+                            </View>
+                        ) : null}
+
+                        {/* ── Basic Info Cards ── */}
+                        <Text className="text-sm font-latoBold text-gray-700 mb-2">
+                            Basic Information
                         </Text>
-                        <DetailRow label="Shape" value={diamond.shape} />
-                        <DetailRow
-                            label="Carat Weight"
-                            value={`${diamond.weight} ct`}
+                        <View className="flex-row gap-2 mb-2">
+                            <InfoCard
+                                icon="shapes-outline"
+                                title="Round Shape"
+                                subtitle={diamond.shape ?? "-"}
+                            />
+                            <InfoCard
+                                icon="scale-outline"
+                                title="Carat"
+                                subtitle={
+                                    diamond.weight
+                                        ? `${diamond.weight} Carat`
+                                        : "-"
+                                }
+                            />
+                        </View>
+                        <View className="flex-row gap-2 mb-5">
+                            <InfoCard
+                                icon="color-palette-outline"
+                                title={`Color ${diamond.color}`}
+                                subtitle="Grades diamond's whiteness and purity."
+                            />
+                            <InfoCard
+                                icon="eye-outline"
+                                title={`Clarity ${diamond.clarity}`}
+                                subtitle="Reveals internal and external flaws."
+                            />
+                        </View>
+
+                        {/* ── ADD TO CART Button ── */}
+                        <TouchableOpacity
+                            className="bg-[#c9a84c] py-3 rounded-sm items-center mb-6"
+                            activeOpacity={0.85}
+                        >
+                            <Text className="text-white font-latoBold uppercase tracking-widest text-sm">
+                                Add to Cart
+                            </Text>
+                        </TouchableOpacity>
+
+                        {/* ── Details Table ── */}
+                        <SectionTable
+                            title="Details"
+                            rows={[
+                                { label: "Stock No", value: diamond.stockRef },
+                                { label: "Report No", value: diamond.certiNo },
+                                { label: "Lab", value: diamond.lab },
+                                {
+                                    label: "Price/Carat",
+                                    value: diamond.pricePerCts
+                                        ? `$${diamond.pricePerCts.toLocaleString()}`
+                                        : "-",
+                                },
+                                { label: "Shape", value: diamond.shape },
+                                { label: "Carat", value: diamond.weight },
+                                { label: "Color", value: diamond.color },
+                                { label: "Clarity", value: diamond.clarity },
+                                {
+                                    label: "Shade",
+                                    value: (diamond as any).shade,
+                                },
+                                { label: "Cut", value: diamond.cutGrade },
+                                { label: "Polish", value: diamond.polish },
+                                { label: "Symmetry", value: diamond.symmetry },
+                                {
+                                    label: "Fluorescence",
+                                    value: diamond.fluorescenceIntensity,
+                                },
+                            ]}
                         />
-                        <DetailRow label="Color" value={diamond.color} />
-                        <DetailRow label="Clarity" value={diamond.clarity} />
-                        <DetailRow label="Cut Grade" value={diamond.cutGrade} />
-                        <DetailRow label="Polish" value={diamond.polish} />
-                        <DetailRow label="Symmetry" value={diamond.symmetry} />
-                        <DetailRow
-                            label="Fluorescence"
-                            value={diamond.fluorescenceIntensity}
+
+                        {/* ── Measurements Table ── */}
+                        <SectionTable
+                            title="Measurements"
+                            rows={[
+                                {
+                                    label: "Table%",
+                                    value:
+                                        diamond.tablePerc != null
+                                            ? diamond.tablePerc.toFixed(2)
+                                            : "-",
+                                },
+                                {
+                                    label: "Depth%",
+                                    value:
+                                        diamond.depthPerc != null
+                                            ? diamond.depthPerc.toFixed(2)
+                                            : "-",
+                                },
+                                {
+                                    label: "Length",
+                                    value: diamond.length ?? "-",
+                                },
+                                {
+                                    label: "Width",
+                                    value: diamond.width ?? "-",
+                                },
+                                {
+                                    label: "Depth",
+                                    value: diamond.height ?? "-",
+                                },
+                                {
+                                    label: "Ratio",
+                                    value:
+                                        diamond.length && diamond.width
+                                            ? (
+                                                  diamond.length / diamond.width
+                                              ).toFixed(2)
+                                            : "-",
+                                },
+                                {
+                                    label: "Crown Angle",
+                                    value:
+                                        (diamond as any).crownAngle != null
+                                            ? (
+                                                  diamond as any
+                                              ).crownAngle.toFixed(2)
+                                            : "-",
+                                },
+                                {
+                                    label: "Crown Height",
+                                    value:
+                                        (diamond as any).crownHeight != null
+                                            ? (
+                                                  diamond as any
+                                              ).crownHeight.toFixed(2)
+                                            : "-",
+                                },
+                                {
+                                    label: "Pav Angle",
+                                    value:
+                                        (diamond as any).pavalionAngle != null
+                                            ? (
+                                                  diamond as any
+                                              ).pavalionAngle.toFixed(2)
+                                            : "-",
+                                },
+                                {
+                                    label: "Pav Height",
+                                    value:
+                                        (diamond as any).pavalionDepth != null
+                                            ? (
+                                                  diamond as any
+                                              ).pavalionDepth.toFixed(2)
+                                            : "-",
+                                },
+                                {
+                                    label: "Girdle",
+                                    value: (diamond as any).girdle,
+                                },
+                                {
+                                    label: "Culet",
+                                    value: (diamond as any).culetSize,
+                                },
+                                {
+                                    label: "Laser Ins.",
+                                    value: (diamond as any).laserInscription,
+                                },
+                            ]}
                         />
-                        <DetailRow label="Lab" value={diamond.lab} />
-                        <DetailRow
-                            label="Certificate No."
-                            value={
-                                "certiNo" in diamond
-                                    ? diamond.certiNo
-                                    : undefined
-                            }
+
+                        {/* ── Inclusion Details Table ── */}
+                        <SectionTable
+                            title="Inclusion Details"
+                            rows={[
+                                {
+                                    label: "Center Natts",
+                                    value: (diamond as any).centerNatts,
+                                },
+                                {
+                                    label: "Side Natts",
+                                    value: (diamond as any).sideNatts,
+                                },
+                                {
+                                    label: "Center White",
+                                    value: (diamond as any).centerWhite,
+                                },
+                                {
+                                    label: "Side White",
+                                    value: (diamond as any).sideWhite,
+                                },
+                                {
+                                    label: "Table open",
+                                    value: (diamond as any).tableOpen,
+                                },
+                                {
+                                    label: "Crown open",
+                                    value: (diamond as any).crownOpen,
+                                },
+                                {
+                                    label: "Pavilion open",
+                                    value: (diamond as any).pavilionOpen,
+                                },
+                                {
+                                    label: "Eye Clean",
+                                    value: (diamond as any).eyeClean,
+                                },
+                                {
+                                    label: "Herat & Arrow",
+                                    value: (diamond as any).heartArrow,
+                                },
+                                {
+                                    label: "Brilliancy",
+                                    value: (diamond as any).brilliancy,
+                                },
+                                {
+                                    label: "Type2 Cert",
+                                    value: (diamond as any).type2Cert,
+                                },
+                                {
+                                    label: "Country Of Origin",
+                                    value: (diamond as any).country,
+                                },
+                            ]}
                         />
-                        <DetailRow
-                            label="Measurements"
-                            value={diamond.measurements}
-                        />
-                        <DetailRow
-                            label="Table %"
-                            value={`${diamond.tablePerc}%`}
-                        />
-                        <DetailRow
-                            label="Depth %"
-                            value={`${diamond.depthPerc}%`}
-                        />
-                        <DetailRow
-                            label="Length"
-                            value={`${diamond.length} mm`}
-                        />
-                        <DetailRow
-                            label="Width"
-                            value={`${diamond.width} mm`}
-                        />
-                        <DetailRow
-                            label="Height"
-                            value={`${diamond.height} mm`}
-                        />
+
+                        {/* ── Full-width bottom rows ── */}
+                        <View className="border border-gray-200 rounded-sm overflow-hidden mb-6">
+                            {[
+                                {
+                                    label: "Key to Symbols",
+                                    value: (diamond as any).keyToSymbols?.join(
+                                        ", ",
+                                    ),
+                                },
+                                {
+                                    label: "Report Comments",
+                                    value: (diamond as any).certComment,
+                                },
+                                {
+                                    label: "HRC Comments",
+                                    value: (diamond as any).memberComment,
+                                },
+                            ].map((row, idx) => (
+                                <View
+                                    key={idx}
+                                    className="flex-row border-b border-gray-100 last:border-0"
+                                >
+                                    <View className="w-36 py-2 px-3 border-r border-gray-100 bg-gray-50">
+                                        <Text className="text-xs font-latoBold text-gray-700">
+                                            {row.label}
+                                        </Text>
+                                    </View>
+                                    <View className="flex-1 py-2 px-3">
+                                        <Text className="text-xs text-gray-600 font-lato">
+                                            {row.value || "-"}
+                                        </Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
                     </View>
-                    <Text>{JSON.stringify(diamond)}</Text>
                 </ScrollView>
             )}
         </SafeAreaView>

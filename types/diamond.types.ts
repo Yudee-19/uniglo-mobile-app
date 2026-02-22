@@ -76,6 +76,8 @@ export interface FilterState {
     sortBy?: string;
     sortOrder?: "asc" | "desc";
 }
+export type DiamondAvailability = "A" | "M" | "H" | "S"; // Available, Memo, Hold, Sold
+export type DiamondLab = "GIA" | "IGI" | "HRD" | "OTHERS";
 
 export const SHAPES: { value: DiamondShape; label: string }[] = [
     { value: "RD", label: "Round" },

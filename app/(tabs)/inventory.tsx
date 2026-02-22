@@ -204,8 +204,8 @@ export default function InventoryScreen() {
                                     );
                                 }
                             }}
-                            minimumValue={0}
-                            maximumValue={10}
+                            minimumValue={0.1}
+                            maximumValue={10.99}
                             step={0.01}
                             minimumTrackTintColor="#EAB308"
                             maximumTrackTintColor="#E5E7EB"
