@@ -382,14 +382,7 @@ export default function InventoryScreen() {
                         </>
                     ) : (
                         diamonds.map((diamond) => (
-                            <DiamondCard
-                                key={
-                                    "_id" in diamond
-                                        ? diamond._id
-                                        : diamond.stockRef
-                                }
-                                diamond={diamond}
-                            />
+                            <DiamondCard key={diamond._id} diamond={diamond} />
                         ))
                     )}
                 </View>

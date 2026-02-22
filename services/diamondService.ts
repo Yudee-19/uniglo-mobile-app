@@ -146,26 +146,26 @@ export interface Diamond {
     similar_diamonds?: string[];
 }
 
-export interface PublicDiamond {
-    stockRef: string;
-    shape: string;
-    weight: number;
-    color: string;
-    clarity: string;
-    cutGrade: string;
-    polish: string;
-    symmetry: string;
-    fluorescenceIntensity: string;
-    lab: string;
-    length: number;
-    width: number;
-    height: number;
-    depthPerc: number;
-    tablePerc: number;
-    measurements: string;
-    webLink: string;
-    availability: string;
-}
+// export interface PublicDiamond {
+//     stockRef: string;
+//     shape: string;
+//     weight: number;
+//     color: string;
+//     clarity: string;
+//     cutGrade: string;
+//     polish: string;
+//     symmetry: string;
+//     fluorescenceIntensity: string;
+//     lab: string;
+//     length: number;
+//     width: number;
+//     height: number;
+//     depthPerc: number;
+//     tablePerc: number;
+//     measurements: string;
+//     webLink: string;
+//     availability: string;
+// }
 
 interface ApiResponse<T> {
     success: boolean;
@@ -183,9 +183,8 @@ interface ApiResponse<T> {
 
 export const searchDiamonds = async (
     params: DiamondParams,
-    isAuthenticated: boolean,
 ): Promise<{
-    data: (Diamond | PublicDiamond)[];
+    data: Diamond[];
     totalCount: number;
     currentPage: number;
     totalPages: number;
@@ -282,13 +281,11 @@ export const searchDiamonds = async (
         if (params.searchTerm)
             queryParams.append("searchTerm", params.searchTerm);
 
-        const endpoint = isAuthenticated
-            ? "/diamonds/search"
-            : "/diamonds/safe";
+        const endpoint = "/diamonds/search";
         console.log(
             `Making API request to: ${API_BASE_URL}${endpoint}?${queryParams.toString()}`,
         );
-        const response = await axios.get<ApiResponse<Diamond | PublicDiamond>>(
+        const response = await axios.get<ApiResponse<Diamond>>(
             `${API_BASE_URL}${endpoint}?${queryParams.toString()}`,
         );
 

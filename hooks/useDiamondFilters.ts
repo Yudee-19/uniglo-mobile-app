@@ -2,7 +2,6 @@ import { useAuth } from "@/context/AuthContext";
 import {
     Diamond,
     DiamondParams,
-    PublicDiamond,
     searchDiamonds,
 } from "@/services/diamondService";
 import { FilterState } from "@/types/diamond.types";
@@ -37,7 +36,7 @@ const initialFilterState: FilterState = {
 export const useDiamondFilters = () => {
     const { isAuthenticated } = useAuth();
     const [filters, setFilters] = useState<FilterState>(initialFilterState);
-    const [diamonds, setDiamonds] = useState<(Diamond | PublicDiamond)[]>([]);
+    const [diamonds, setDiamonds] = useState<Diamond[]>([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
@@ -169,7 +168,7 @@ export const useDiamondFilters = () => {
         setLoading(true);
         try {
             const params = buildParams();
-            const result = await searchDiamonds(params, isAuthenticated);
+            const result = await searchDiamonds(params);
             setDiamonds(result.data);
             setTotalCount(result.totalCount);
         } catch (error) {
@@ -177,7 +176,7 @@ export const useDiamondFilters = () => {
         } finally {
             setLoading(false);
         }
-    }, [buildParams, isAuthenticated]);
+    }, [buildParams]);
 
     useEffect(() => {
         const timer = setTimeout(() => {

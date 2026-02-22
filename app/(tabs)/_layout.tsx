@@ -1,33 +1,36 @@
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { router, Tabs } from "expo-router";
 import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 function AppHeader() {
     return (
-        <View className="flex-row items-center justify-between px-4 py-3 bg-white ">
+        <View className="flex-row items-center justify-between px-4 py-3 bg-white">
             {/* Center - Logo */}
             <View className="flex-row items-center gap-2">
                 <Image
                     source={require("@/assets/images/logo.png")}
-                    className="w-10 h-10 "
+                    className="w-10 h-10"
                     resizeMode="contain"
                 />
-                <Text className=" font-loraBold text-xl tracking-widest text-primary-purple ">
+                <Text className="font-loraBold text-xl tracking-widest text-primary-purple">
                     UNIGLO DIAMONDS
                 </Text>
             </View>
-
-            {/* Right - Cart & Notification */}
-            <View className="flex-row items-center gap-3">
-                <TouchableOpacity className="w-9 h-9 items-center justify-center">
-                    <Ionicons name="cart-outline" size={24} color="#49214c" />
-                </TouchableOpacity>
-                <TouchableOpacity className="w-9 h-9 items-center justify-center">
-                    <Ionicons name="person-outline" size={24} color="#49214c" />
-                </TouchableOpacity>
-            </View>
+            {/* Right - Cart & Profile */}
+            <TouchableOpacity
+                onPress={() => router.push("/cart")}
+                className="w-9 h-9 items-center justify-center"
+            >
+                <Ionicons name="cart-outline" size={24} color="#49214c" />
+            </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => router.push("/profile")}
+                className="w-9 h-9 items-center justify-center"
+            >
+                <Ionicons name="person-outline" size={24} color="#49214c" />
+            </TouchableOpacity>
         </View>
     );
 }
@@ -78,6 +81,7 @@ export default function TabsLayout() {
                             if (!isAuthenticated) {
                                 e.preventDefault();
                                 alert("Please login to access Inventory");
+                                router.push("/login");
                             }
                         },
                     }}
@@ -114,8 +118,15 @@ export default function TabsLayout() {
                             if (!isAuthenticated) {
                                 e.preventDefault();
                                 alert("Please login to access Operations");
+                                router.push("/login");
                             }
                         },
+                    }}
+                />
+                <Tabs.Screen
+                    name="cart"
+                    options={{
+                        href: null, // This hides the tab from the bottom bar
                     }}
                 />
             </Tabs>

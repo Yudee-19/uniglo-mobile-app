@@ -50,7 +50,13 @@ export default function RootLayout() {
 
     return (
         <AuthProvider>
-            <Stack screenOptions={{ headerShown: false }} />
+            <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                {/* <Stack.Screen name="cart" options={{ headerShown: false }} />
+                <Stack.Screen name="profile" options={{ headerShown: false }} />
+                <Stack.Screen name="diamond" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} /> */}
+            </Stack>
         </AuthProvider>
     );
 }
