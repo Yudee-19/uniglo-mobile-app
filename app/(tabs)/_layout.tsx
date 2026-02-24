@@ -1,7 +1,14 @@
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Tabs, usePathname } from "expo-router";
-import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
+import {
+    Alert,
+    Image,
+    Platform,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export function AppHeader() {
@@ -104,8 +111,11 @@ export default function TabsLayout() {
                         tabPress: (e) => {
                             if (!isAuthenticated) {
                                 e.preventDefault();
-                                alert("Please login to access Inventory");
-                                router.push("/login");
+                                Alert.alert(
+                                    "Authentication Required",
+                                    "Please login to access Inventory",
+                                );
+                                router.push("/(auth)/login");
                             }
                         },
                     }}
@@ -141,8 +151,11 @@ export default function TabsLayout() {
                         tabPress: (e) => {
                             if (!isAuthenticated) {
                                 e.preventDefault();
-                                alert("Please login to access Operations");
-                                router.push("/login");
+                                Alert.alert(
+                                    "Authentication Required",
+                                    "Please login to access Operations",
+                                );
+                                router.push("/(auth)/login");
                             }
                         },
                     }}

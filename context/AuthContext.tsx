@@ -52,8 +52,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const inTabs = segments[0] === "(tabs)";
 
         if (!user && !inAuthGroup && !inTabs) {
-            // Redirect to tabs (home) by default - home is public
-            router.replace("/(tabs)");
+            // Redirect to login by default
+            router.replace("/(auth)/login");
         } else if (user && inAuthGroup) {
             // Redirect to home if authenticated and in auth group
             router.replace("/(tabs)");
