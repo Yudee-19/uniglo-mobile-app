@@ -45,6 +45,11 @@ export interface RemoveFromCartResponseData {
     cart: Cart | null;
 }
 
+export interface HoldItemsResponseData {
+    holdItems: CartItem[];
+    totalItems: number;
+}
+
 export const getCart = async (): Promise<
     ApiSuccessResponse<CartResponseData>
 > => {
@@ -128,6 +133,23 @@ export const holdDiamond = async (
         throw (
             axiosError.response?.data?.message ||
             "Failed to hold diamond. Please try again."
+        );
+    }
+};
+
+export const getHoldItems = async (): Promise<
+    ApiSuccessResponse<HoldItemsResponseData>
+> => {
+    try {
+        const response = await apiClient.get<
+            ApiSuccessResponse<HoldItemsResponseData>
+        >("/diamonds/cart/hold");
+        return response.data;
+    } catch (error) {
+        const axiosError = error as AxiosError<ApiErrorResponse>;
+        throw (
+            axiosError.response?.data?.message ||
+            "Failed to retrieve hold items. Please try again."
         );
     }
 };
