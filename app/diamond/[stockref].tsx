@@ -1,9 +1,11 @@
+import { addToCart, holdDiamond } from "@/services/cartServices";
 import { Diamond, fetchDiamondById } from "@/services/diamondService";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    Alert,
     Image,
     ScrollView,
     Text,
@@ -11,6 +13,7 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AppHeader } from "../(tabs)/_layout";
 
 // ─── Helper Components ────────────────────────────────────────────────────────
 
@@ -100,6 +103,8 @@ export default function DiamondDetailScreen() {
     const [diamond, setDiamond] = useState<Diamond | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [addingToCart, setAddingToCart] = useState(false);
+    const [holdingDiamond, setHoldingDiamond] = useState(false);
 
     useEffect(() => {
         const loadDiamond = async () => {
@@ -120,10 +125,45 @@ export default function DiamondDetailScreen() {
         loadDiamond();
     }, [stockref]);
 
+    const handleAddToCart = async () => {
+        if (!diamond?._id) return;
+        setAddingToCart(true);
+        try {
+            await addToCart([diamond._id]);
+            Alert.alert("Success", "Diamond added to cart successfully!");
+        } catch (err) {
+            Alert.alert(
+                "Error",
+                typeof err === "string"
+                    ? err
+                    : "Failed to add diamond to cart.",
+            );
+        } finally {
+            setAddingToCart(false);
+        }
+    };
+
+    const handleHoldDiamond = async () => {
+        if (!diamond?.stockRef) return;
+        setHoldingDiamond(true);
+        try {
+            await holdDiamond(diamond.stockRef);
+            Alert.alert("Success", "Diamond is now on hold!");
+        } catch (err) {
+            Alert.alert(
+                "Error",
+                typeof err === "string" ? err : "Failed to hold diamond.",
+            );
+        } finally {
+            setHoldingDiamond(false);
+        }
+    };
+
     return (
         <SafeAreaView className="flex-1 bg-white">
+            <AppHeader />
             {/* Header */}
-            <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
+            <View className="flex-row items-center px-4 py-3 border-t border-gray-100">
                 <TouchableOpacity
                     onPress={() => router.back()}
                     className="w-9 h-9 items-center justify-center rounded-full border border-gray-200 mr-3"
@@ -237,16 +277,45 @@ export default function DiamondDetailScreen() {
                             />
                         </View>
 
-                        {/* ── ADD TO CART Button ── */}
-                        <TouchableOpacity
-                            className="bg-[#c9a84c] py-3 rounded-sm items-center mb-6"
-                            activeOpacity={0.85}
-                        >
-                            <Text className="text-white font-latoBold uppercase tracking-widest text-sm">
-                                Add to Cart
-                            </Text>
-                        </TouchableOpacity>
+                        {/* ── ADD TO CART & HOLD Buttons ── */}
+                        <View className="flex-row gap-2 mb-3">
+                            <TouchableOpacity
+                                className="bg-[#c9a84c] py-3 rounded-sm items-center flex-1"
+                                activeOpacity={0.85}
+                                onPress={handleAddToCart}
+                                disabled={addingToCart}
+                            >
+                                {addingToCart ? (
+                                    <ActivityIndicator
+                                        size="small"
+                                        color="#fff"
+                                    />
+                                ) : (
+                                    <Text className="text-white font-latoBold uppercase tracking-widest text-sm">
+                                        Add to Cart
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
 
+                            {/* ── HOLD DIAMOND Button ── */}
+                            <TouchableOpacity
+                                className="bg-[#26062b] py-3 rounded-sm items-center flex-1"
+                                activeOpacity={0.85}
+                                onPress={handleHoldDiamond}
+                                disabled={holdingDiamond}
+                            >
+                                {holdingDiamond ? (
+                                    <ActivityIndicator
+                                        size="small"
+                                        color="#fff"
+                                    />
+                                ) : (
+                                    <Text className="text-white font-latoBold uppercase tracking-widest text-sm">
+                                        Hold Diamond
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
                         {/* ── Details Table ── */}
                         <SectionTable
                             title="Details"

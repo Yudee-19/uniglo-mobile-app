@@ -5,6 +5,8 @@ import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export function AppHeader() {
+    const { isAuthenticated, loading: authLoading } = useAuth();
+
     return (
         <View className="flex-row items-center justify-between px-4 py-3 bg-white">
             {/* Center - Logo */}
@@ -19,18 +21,28 @@ export function AppHeader() {
                 </Text>
             </View>
             {/* Right - Cart & Profile */}
-            <TouchableOpacity
-                onPress={() => router.push("/cart")}
-                className="w-9 h-9 items-center justify-center"
-            >
-                <Ionicons name="cart-outline" size={24} color="#49214c" />
-            </TouchableOpacity>
-            <TouchableOpacity
-                onPress={() => router.push("/profile")}
-                className="w-9 h-9 items-center justify-center"
-            >
-                <Ionicons name="person-outline" size={24} color="#49214c" />
-            </TouchableOpacity>
+            <View className="flex-row items-center gap-4">
+                <TouchableOpacity
+                    onPress={() => router.push("/cart")}
+                    className={
+                        "w-9 h-9 items-center justify-center " +
+                        (authLoading || !isAuthenticated ? "opacity-50" : "")
+                    }
+                    disabled={authLoading || !isAuthenticated}
+                >
+                    <Ionicons name="cart-outline" size={24} color="#49214c" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => router.push("/profile")}
+                    className={
+                        "w-9 h-9 items-center justify-center " +
+                        (authLoading || !isAuthenticated ? "opacity-50" : "")
+                    }
+                    disabled={authLoading || !isAuthenticated}
+                >
+                    <Ionicons name="person-outline" size={24} color="#49214c" />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
@@ -121,12 +133,6 @@ export default function TabsLayout() {
                                 router.push("/login");
                             }
                         },
-                    }}
-                />
-                <Tabs.Screen
-                    name="cart"
-                    options={{
-                        href: null, // This hides the tab from the bottom bar
                     }}
                 />
             </Tabs>

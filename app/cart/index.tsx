@@ -99,15 +99,15 @@ function SwipeableCartCard({
             {/* Delete background */}
             <Animated.View
                 style={{ opacity: deleteOpacity }}
-                className="absolute right-0 top-0 bottom-0 w-24 bg-red-400/60 rounded-lg items-center justify-center"
+                className="absolute right-0 top-0 bottom-0 w-24 rounded-lg items-center justify-center border border-gray-200 bg-gray-50"
             >
                 <TouchableOpacity
                     onPress={handleDelete}
                     disabled={actionLoading}
                     className="flex-1 w-full items-center justify-center gap-1"
                 >
-                    <Ionicons name="trash-outline" size={22} color="#fff" />
-                    <Text className="text-white text-xs font-latoBold">
+                    <Ionicons name="trash-outline" size={22} color="gray" />
+                    <Text className="text-gray-400 text-xs font-latoBold">
                         Remove
                     </Text>
                 </TouchableOpacity>
@@ -136,7 +136,8 @@ export default function CartScreen() {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [actionLoading, setActionLoading] = useState(false);
+    const [removingId, setRemovingId] = useState<string | null>(null);
+    const [clearingCart, setClearingCart] = useState(false);
 
     const fetchCart = useCallback(async (silent = false) => {
         if (!silent) setLoading(true);
@@ -164,13 +165,13 @@ export default function CartScreen() {
 
     const handleRemoveOne = async (diamondId: string) => {
         try {
-            setActionLoading(true);
+            setRemovingId(diamondId);
             await removeFromCart(diamondId);
             await fetchCart(true);
         } catch (err: any) {
             Alert.alert("Error", err?.toString() ?? "Failed to remove item");
         } finally {
-            setActionLoading(false);
+            setRemovingId(null);
         }
     };
 
@@ -186,7 +187,7 @@ export default function CartScreen() {
                     style: "destructive",
                     onPress: async () => {
                         try {
-                            setActionLoading(true);
+                            setClearingCart(true);
                             await clearCart();
                             await fetchCart(true);
                         } catch (err: any) {
@@ -195,7 +196,7 @@ export default function CartScreen() {
                                 err?.toString() ?? "Failed to clear cart",
                             );
                         } finally {
-                            setActionLoading(false);
+                            setClearingCart(false);
                         }
                     },
                 },
@@ -229,16 +230,16 @@ export default function CartScreen() {
                             <TouchableOpacity
                                 onPress={handleClearCart}
                                 disabled={
-                                    actionLoading || cartItems.length === 0
+                                    clearingCart || cartItems.length === 0
                                 }
                                 style={{
                                     opacity:
-                                        actionLoading || cartItems.length === 0
+                                        clearingCart || cartItems.length === 0
                                             ? 0.4
                                             : 1,
                                 }}
                             >
-                                {actionLoading ? (
+                                {clearingCart ? (
                                     <ActivityIndicator
                                         size="small"
                                         color="#ef4444"
@@ -298,7 +299,9 @@ export default function CartScreen() {
                             renderItem={({ item }) => (
                                 <SwipeableCartCard
                                     item={item}
-                                    actionLoading={actionLoading}
+                                    actionLoading={
+                                        removingId === item.diamond._id
+                                    }
                                     onRemove={() =>
                                         handleRemoveOne(item.diamond._id)
                                     }

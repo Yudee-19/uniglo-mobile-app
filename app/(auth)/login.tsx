@@ -317,6 +317,24 @@ export default function LoginScreen() {
                                 </Pressable>
                             </Link>
                         </View>
+                        <View className="flex-row items-center mt-3">
+                            <Link href="/(tabs)" asChild>
+                                <Pressable
+                                    disabled={isLoading}
+                                    className="flex-row gap-1 items-center"
+                                >
+                                    <Text className="text-gray-400 text-sm">
+                                        Continue without an account{" "}
+                                    </Text>
+                                    <Ionicons
+                                        name="arrow-forward"
+                                        size={14}
+                                        color="#fff"
+                                        className="mt-0.5"
+                                    />
+                                </Pressable>
+                            </Link>
+                        </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
             </LinearGradient>
