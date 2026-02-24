@@ -1,9 +1,9 @@
-import { Diamond, PublicDiamond } from "@/services/diamondService";
+import { Diamond } from "@/services/diamondService";
 import { useRouter } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface DiamondCardProps {
-    diamond: Diamond | PublicDiamond;
+    diamond: Diamond;
 }
 
 export function DiamondCard({ diamond }: DiamondCardProps) {

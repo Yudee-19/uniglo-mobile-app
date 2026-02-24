@@ -1,11 +1,15 @@
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Tabs } from "expo-router";
+import { router, Tabs, usePathname } from "expo-router";
 import { Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export function AppHeader() {
     const { isAuthenticated, loading: authLoading } = useAuth();
+    const pathname = usePathname();
+
+    const isCartActive = pathname.startsWith("/cart");
+    const isProfileActive = pathname.startsWith("/profile");
 
     return (
         <View className="flex-row items-center justify-between px-4 py-3 bg-white">
@@ -30,7 +34,11 @@ export function AppHeader() {
                     }
                     disabled={authLoading || !isAuthenticated}
                 >
-                    <Ionicons name="cart-outline" size={24} color="#49214c" />
+                    <Ionicons
+                        name={isCartActive ? "cart" : "cart-outline"}
+                        size={24}
+                        color="#49214c"
+                    />
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => router.push("/profile")}
@@ -40,7 +48,11 @@ export function AppHeader() {
                     }
                     disabled={authLoading || !isAuthenticated}
                 >
-                    <Ionicons name="person-outline" size={24} color="#49214c" />
+                    <Ionicons
+                        name={isProfileActive ? "person" : "person-outline"}
+                        size={24}
+                        color="#49214c"
+                    />
                 </TouchableOpacity>
             </View>
         </View>

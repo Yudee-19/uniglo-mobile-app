@@ -118,3 +118,16 @@ export const CLARITIES: DiamondClarity[] = [
 export const FINISHES: DiamondCut[] = ["EX", "VG", "G"];
 
 export const CARAT_RANGES = [{ label: "1.20-5.00", min: 1.2, max: 5.0 }];
+
+export const SHAPE_IMAGES: Record<string, any> = {
+    RD: require("@/assets/shapes/round-diamond.png"),
+    PR: require("@/assets/shapes/princess-diamond.png"),
+    PS: require("@/assets/shapes/pear-diamond.png"),
+    OV: require("@/assets/shapes/Oval-Diamond.png"),
+    EM: require("@/assets/shapes/emerald-diamond.png"),
+    MQ: require("@/assets/shapes/marquise-diamond.png"),
+    HT: require("@/assets/shapes/heart.png"),
+    RA: require("@/assets/shapes/radiant-diamond.png"),
+    AS: require("@/assets/shapes/asscher-diamond.png"),
+    CU: require("@/assets/shapes/cushion-diamond.png"),
+};

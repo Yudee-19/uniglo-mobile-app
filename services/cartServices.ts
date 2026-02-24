@@ -121,7 +121,7 @@ export const clearCart = async (): Promise<
 };
 
 export const holdDiamond = async (
-    stockRef: string,
+    stockRef: string | string[],
 ): Promise<ApiSuccessResponse<HoldDiamondResponseData>> => {
     try {
         const response = await apiClient.post<

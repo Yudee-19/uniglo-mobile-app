@@ -2,15 +2,17 @@ import { DiamondCard } from "@/components/inventory/DiamondCard";
 import { DiamondCardSkeleton } from "@/components/inventory/DiamondCardSkeleton";
 import { useAuth } from "@/context/AuthContext";
 import { useDiamondFilters } from "@/hooks/useDiamondFilters";
-import { CLARITIES, COLORS, FINISHES, SHAPES } from "@/types/diamond.types";
+import { CLARITIES, COLORS, SHAPES, SHAPE_IMAGES } from "@/types/diamond.types";
 import { Fontisto, Ionicons } from "@expo/vector-icons";
 import { Slider } from "@miblanchard/react-native-slider";
 import { Redirect } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     Animated,
     Dimensions,
+    Image,
     Modal,
+    RefreshControl,
     ScrollView,
     Text,
     TouchableOpacity,
@@ -48,6 +50,7 @@ export default function InventoryScreen() {
     const [filterAnimation] = useState(new Animated.Value(0));
     const [showSortModal, setShowSortModal] = useState(false);
     const [selectedSort, setSelectedSort] = useState("recent");
+    const [refreshing, setRefreshing] = useState(false);
     const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
     // Sync selectedSort with filter state
@@ -112,6 +115,25 @@ export default function InventoryScreen() {
         );
     };
 
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        resetFilters();
+        setSelectedSort("recent");
+        // Close filter panel if open
+        if (showFilters) {
+            Animated.timing(filterAnimation, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: false,
+            }).start();
+            setShowFilters(false);
+        }
+        // Wait a short time for filters to reset and data to reload
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 1000);
+    }, [resetFilters, showFilters, filterAnimation]);
+
     if (!isAuthenticated) {
         return <Redirect href="/(auth)/login" />;
     }
@@ -142,7 +164,17 @@ export default function InventoryScreen() {
                 </View>
             </View>
 
-            <ScrollView className="flex-1 bg-gray-50">
+            <ScrollView
+                className="flex-1 bg-gray-50"
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor="#49214c"
+                        colors={["#49214c"]}
+                    />
+                }
+            >
                 {/* Collapsible Filters Section */}
                 <Animated.View
                     style={{
@@ -171,13 +203,26 @@ export default function InventoryScreen() {
                                     }
                                     className={`w-20 aspect-square items-center justify-center rounded-lg border-2 ${
                                         filters.shape.includes(shape.value)
-                                            ? "border-yellow-500 bg-yellow-50"
+                                            ? "border-primary-yellow-3 bg-yellow-50"
                                             : "border-gray-300"
                                     }`}
                                 >
-                                    <Text className="text-xs text-center mt-1">
+                                    {SHAPE_IMAGES[shape.value] ? (
+                                        <Image
+                                            source={SHAPE_IMAGES[shape.value]}
+                                            className="w-12 h-12"
+                                            resizeMode="contain"
+                                        />
+                                    ) : (
+                                        <Ionicons
+                                            name="diamond-outline"
+                                            size={24}
+                                            color="#9CA3AF"
+                                        />
+                                    )}
+                                    {/* <Text className="text-xs text-center mt-1">
                                         {shape.label}
-                                    </Text>
+                                    </Text> */}
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
@@ -207,13 +252,13 @@ export default function InventoryScreen() {
                             minimumValue={0.1}
                             maximumValue={10.99}
                             step={0.01}
-                            minimumTrackTintColor="#EAB308"
-                            maximumTrackTintColor="#E5E7EB"
-                            thumbTintColor="#EAB308"
+                            minimumTrackTintColor="#bb923a"
+                            maximumTrackTintColor="#d1c1b8"
+                            thumbTintColor="#bb923a"
                             trackStyle={{ height: 4, borderRadius: 2 }}
                             thumbStyle={{
-                                width: 20,
-                                height: 20,
+                                width: 15,
+                                height: 15,
                                 borderRadius: 10,
                             }}
                         />
@@ -236,9 +281,9 @@ export default function InventoryScreen() {
                                 <TouchableOpacity
                                     key={color}
                                     onPress={() => toggleFilter("color", color)}
-                                    className={`px-4 py-2 rounded-full border ${
+                                    className={`px-4 py-2 rounded-sm border ${
                                         filters.color.includes(color)
-                                            ? "border-yellow-500 bg-yellow-50"
+                                            ? "border-primary-yellow-3 bg-yellow-50"
                                             : "border-gray-300"
                                     }`}
                                 >
@@ -275,9 +320,9 @@ export default function InventoryScreen() {
                                     onPress={() =>
                                         toggleFilter("clarity", clarity)
                                     }
-                                    className={`px-4 py-2 rounded-full border ${
+                                    className={`px-4 py-2 rounded-sm border ${
                                         filters.clarity.includes(clarity)
-                                            ? "border-yellow-500 bg-yellow-50"
+                                            ? "border-primary-yellow-3 bg-yellow-50"
                                             : "border-gray-300"
                                     }`}
                                 >
@@ -300,31 +345,103 @@ export default function InventoryScreen() {
                         <Text className="text-sm font-semibold text-yellow-700 mb-3">
                             FINISH
                         </Text>
-                        <View className="flex-row flex-wrap gap-2">
-                            {FINISHES.map((finish) => (
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{
+                                gap: 8,
+                                paddingVertical: 4,
+                            }}
+                        >
+                            {[
+                                {
+                                    label: "3EX",
+                                    isActive:
+                                        filters.cutGrade.length === 1 &&
+                                        filters.cutGrade.includes("EX") &&
+                                        filters.symmetry?.length === 1 &&
+                                        filters.symmetry?.includes("EX") &&
+                                        filters.polish?.length === 1 &&
+                                        filters.polish?.includes("EX"),
+                                    onPress: () => {
+                                        updateFilter("cutGrade", ["EX"]);
+                                        updateFilter("symmetry", ["EX"]);
+                                        updateFilter("polish", ["EX"]);
+                                    },
+                                },
+                                {
+                                    label: "EX-",
+                                    isActive:
+                                        filters.cutGrade.length === 1 &&
+                                        filters.cutGrade.includes("EX") &&
+                                        filters.symmetry?.length === 2 &&
+                                        filters.symmetry?.includes("EX") &&
+                                        filters.symmetry?.includes("VG") &&
+                                        filters.polish?.length === 2 &&
+                                        filters.polish?.includes("EX") &&
+                                        filters.polish?.includes("VG"),
+                                    onPress: () => {
+                                        updateFilter("cutGrade", ["EX"]);
+                                        updateFilter("symmetry", ["EX", "VG"]);
+                                        updateFilter("polish", ["EX", "VG"]);
+                                    },
+                                },
+                                {
+                                    label: "VG+",
+                                    isActive:
+                                        filters.cutGrade.length === 1 &&
+                                        filters.cutGrade.includes("VG") &&
+                                        filters.symmetry?.length === 2 &&
+                                        filters.symmetry?.includes("EX") &&
+                                        filters.symmetry?.includes("VG") &&
+                                        filters.polish?.length === 2 &&
+                                        filters.polish?.includes("EX") &&
+                                        filters.polish?.includes("VG"),
+                                    onPress: () => {
+                                        updateFilter("cutGrade", ["VG"]);
+                                        updateFilter("symmetry", ["EX", "VG"]);
+                                        updateFilter("polish", ["EX", "VG"]);
+                                    },
+                                },
+                                {
+                                    label: "VG-",
+                                    isActive:
+                                        filters.cutGrade.length === 1 &&
+                                        filters.cutGrade.includes("VG") &&
+                                        filters.symmetry?.length === 2 &&
+                                        filters.symmetry?.includes("VG") &&
+                                        filters.symmetry?.includes("G") &&
+                                        filters.polish?.length === 2 &&
+                                        filters.polish?.includes("VG") &&
+                                        filters.polish?.includes("G"),
+                                    onPress: () => {
+                                        updateFilter("cutGrade", ["VG"]);
+                                        updateFilter("symmetry", ["VG", "G"]);
+                                        updateFilter("polish", ["VG", "G"]);
+                                    },
+                                },
+                            ].map((preset) => (
                                 <TouchableOpacity
-                                    key={finish}
-                                    onPress={() =>
-                                        toggleFilter("cutGrade", finish)
-                                    }
-                                    className={`px-4 py-2 rounded-full border ${
-                                        filters.cutGrade.includes(finish)
-                                            ? "border-yellow-500 bg-yellow-50"
+                                    key={preset.label}
+                                    onPress={preset.onPress}
+                                    className={`px-4 py-2 rounded-sm border ${
+                                        preset.isActive
+                                            ? "border-primary-yellow-3 bg-yellow-50"
                                             : "border-gray-300"
                                     }`}
                                 >
                                     <Text
                                         className={`text-sm font-medium ${
-                                            filters.cutGrade.includes(finish)
+                                            preset.isActive
                                                 ? "text-yellow-700"
                                                 : "text-gray-700"
                                         }`}
                                     >
-                                        {finish}
+                                        {preset.label}
                                     </Text>
                                 </TouchableOpacity>
                             ))}
-                        </View>
+                        </ScrollView>
                     </View>
                 </Animated.View>
 

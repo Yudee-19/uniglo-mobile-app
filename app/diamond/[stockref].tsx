@@ -1,19 +1,29 @@
 import { addToCart, holdDiamond } from "@/services/cartServices";
 import { Diamond, fetchDiamondById } from "@/services/diamondService";
+import { createDiamondInquiry } from "@/services/inquiryServices";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    Animated,
+    Dimensions,
     Image,
+    Keyboard,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
     ScrollView,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppHeader } from "../(tabs)/_layout";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 // ─── Helper Components ────────────────────────────────────────────────────────
 
@@ -106,6 +116,12 @@ export default function DiamondDetailScreen() {
     const [addingToCart, setAddingToCart] = useState(false);
     const [holdingDiamond, setHoldingDiamond] = useState(false);
 
+    // Inquiry modal state
+    const [showInquiryModal, setShowInquiryModal] = useState(false);
+    const [inquiryText, setInquiryText] = useState("");
+    const [submittingInquiry, setSubmittingInquiry] = useState(false);
+    const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
     useEffect(() => {
         const loadDiamond = async () => {
             if (!stockref) return;
@@ -124,6 +140,24 @@ export default function DiamondDetailScreen() {
         };
         loadDiamond();
     }, [stockref]);
+
+    // Animate inquiry modal
+    useEffect(() => {
+        if (showInquiryModal) {
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                useNativeDriver: true,
+                tension: 65,
+                friction: 11,
+            }).start();
+        } else {
+            Animated.timing(slideAnim, {
+                toValue: SCREEN_HEIGHT,
+                duration: 250,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [showInquiryModal]);
 
     const handleAddToCart = async () => {
         if (!diamond?._id) return;
@@ -157,6 +191,40 @@ export default function DiamondDetailScreen() {
         } finally {
             setHoldingDiamond(false);
         }
+    };
+
+    const handleSubmitInquiry = async () => {
+        if (!inquiryText.trim() || !diamond?.stockRef) return;
+
+        setSubmittingInquiry(true);
+        try {
+            await createDiamondInquiry({
+                stockRef: diamond.stockRef,
+                query: inquiryText.trim(),
+            });
+            Keyboard.dismiss();
+            setInquiryText("");
+            setShowInquiryModal(false);
+            Alert.alert(
+                "Inquiry Sent",
+                "Your inquiry has been submitted successfully. You can track it under Operations > Enquiry.",
+            );
+        } catch (err) {
+            Alert.alert(
+                "Error",
+                typeof err === "string"
+                    ? err
+                    : "Failed to submit inquiry. Please try again.",
+            );
+        } finally {
+            setSubmittingInquiry(false);
+        }
+    };
+
+    const closeInquiryModal = () => {
+        Keyboard.dismiss();
+        setShowInquiryModal(false);
+        setInquiryText("");
     };
 
     return (
@@ -297,7 +365,6 @@ export default function DiamondDetailScreen() {
                                 )}
                             </TouchableOpacity>
 
-                            {/* ── HOLD DIAMOND Button ── */}
                             <TouchableOpacity
                                 className="bg-[#26062b] py-3 rounded-sm items-center flex-1"
                                 activeOpacity={0.85}
@@ -316,6 +383,23 @@ export default function DiamondDetailScreen() {
                                 )}
                             </TouchableOpacity>
                         </View>
+
+                        {/* ── INQUIRY Button ── */}
+                        <TouchableOpacity
+                            className="bg-white border-2 border-[#26062b] py-3 rounded-sm items-center mb-5 flex-row justify-center gap-2"
+                            activeOpacity={0.85}
+                            onPress={() => setShowInquiryModal(true)}
+                        >
+                            <Ionicons
+                                name="chatbubble-ellipses-outline"
+                                size={18}
+                                color="#26062b"
+                            />
+                            <Text className="text-[#26062b] font-latoBold uppercase tracking-widest text-sm">
+                                Make an Inquiry
+                            </Text>
+                        </TouchableOpacity>
+
                         {/* ── Details Table ── */}
                         <SectionTable
                             title="Details"
@@ -530,6 +614,149 @@ export default function DiamondDetailScreen() {
                     </View>
                 </ScrollView>
             )}
+
+            {/* ── Inquiry Modal ── */}
+            <Modal
+                visible={showInquiryModal}
+                transparent={true}
+                animationType="none"
+                onRequestClose={closeInquiryModal}
+            >
+                <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={closeInquiryModal}
+                    className="flex-1 bg-black/50 justify-end"
+                >
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === "ios" ? "padding" : undefined}
+                    >
+                        <Animated.View
+                            style={{
+                                transform: [{ translateY: slideAnim }],
+                            }}
+                            className="bg-white rounded-t-3xl"
+                        >
+                            <TouchableOpacity activeOpacity={1}>
+                                {/* Handle bar */}
+                                <View className="items-center pt-3 pb-1">
+                                    <View className="w-10 h-1 rounded-full bg-gray-300" />
+                                </View>
+
+                                {/* Header */}
+                                <View className="px-5 py-3 border-b border-gray-200 flex-row items-center justify-between">
+                                    <Text className="text-lg font-loraBold text-[#26062b]">
+                                        Make an Inquiry
+                                    </Text>
+                                    <TouchableOpacity
+                                        onPress={closeInquiryModal}
+                                        className="w-8 h-8 items-center justify-center rounded-full bg-gray-100"
+                                    >
+                                        <Ionicons
+                                            name="close"
+                                            size={18}
+                                            color="#6B7280"
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+
+                                {/* Diamond info summary */}
+                                {diamond && (
+                                    <View className="px-5 py-3 bg-gray-50 flex-row items-center gap-3">
+                                        <View className="w-10 h-10 rounded-lg bg-gray-200 items-center justify-center overflow-hidden">
+                                            {diamond.webLink ? (
+                                                <Image
+                                                    source={{
+                                                        uri: diamond.webLink,
+                                                    }}
+                                                    className="w-10 h-10 rounded-lg"
+                                                    resizeMode="contain"
+                                                />
+                                            ) : (
+                                                <Ionicons
+                                                    name="diamond-outline"
+                                                    size={18}
+                                                    color="#9CA3AF"
+                                                />
+                                            )}
+                                        </View>
+                                        <View className="flex-1">
+                                            <Text className="text-sm font-latoBold text-gray-900">
+                                                {diamond.shape} {diamond.weight}{" "}
+                                                CT {diamond.color}{" "}
+                                                {diamond.clarity}{" "}
+                                                {diamond.cutGrade}
+                                            </Text>
+                                            <Text className="text-xs font-lato text-gray-500">
+                                                {diamond.stockRef} •{" "}
+                                                {diamond.lab}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                )}
+
+                                {/* Text input */}
+                                <View className="px-5 py-4">
+                                    <Text className="text-sm font-latoBold text-gray-700 mb-2">
+                                        Your Question
+                                    </Text>
+                                    <TextInput
+                                        value={inquiryText}
+                                        onChangeText={setInquiryText}
+                                        placeholder="Type your question about this diamond..."
+                                        placeholderTextColor="#9CA3AF"
+                                        multiline
+                                        numberOfLines={4}
+                                        textAlignVertical="top"
+                                        className="border border-gray-300 rounded-xl px-4 py-3 text-sm font-lato text-gray-800 min-h-[120px]"
+                                        editable={!submittingInquiry}
+                                        autoFocus
+                                    />
+                                    <Text className="text-xs font-lato text-gray-400 mt-1 ml-1">
+                                        Our team will respond to your inquiry as
+                                        soon as possible.
+                                    </Text>
+                                </View>
+
+                                {/* Submit button */}
+                                <View className="px-5 pb-6 pt-1">
+                                    <TouchableOpacity
+                                        onPress={handleSubmitInquiry}
+                                        disabled={
+                                            submittingInquiry ||
+                                            !inquiryText.trim()
+                                        }
+                                        className={`py-3.5 rounded-xl items-center flex-row justify-center gap-2 ${
+                                            inquiryText.trim() &&
+                                            !submittingInquiry
+                                                ? "bg-[#26062b]"
+                                                : "bg-gray-300"
+                                        }`}
+                                        activeOpacity={0.85}
+                                    >
+                                        {submittingInquiry ? (
+                                            <ActivityIndicator
+                                                size="small"
+                                                color="#fff"
+                                            />
+                                        ) : (
+                                            <>
+                                                <Ionicons
+                                                    name="send"
+                                                    size={16}
+                                                    color="#fff"
+                                                />
+                                                <Text className="text-white font-latoBold uppercase tracking-widest text-sm">
+                                                    Submit Inquiry
+                                                </Text>
+                                            </>
+                                        )}
+                                    </TouchableOpacity>
+                                </View>
+                            </TouchableOpacity>
+                        </Animated.View>
+                    </KeyboardAvoidingView>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
     );
 }
