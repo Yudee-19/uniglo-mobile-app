@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError, AxiosResponse } from "axios";
 
 const BASE_URL =
@@ -5,25 +6,26 @@ const BASE_URL =
 
 const apiClient = axios.create({
     baseURL: BASE_URL,
-    withCredentials: true,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-// // Request Interceptor - Log access token if present
-// apiClient.interceptors.request.use(
-//     (config) => {
-//         const token = config.headers?.Authorization;
-//         if (token) {
-//             console.log("Access Token:", token);
-//         } else {
-//             console.log("No access token found in headers.");
-//         }
-//         return config;
-//     },
-//     (error) => Promise.reject(error),
-// );
+// Request Interceptor - Attach Bearer token from AsyncStorage
+apiClient.interceptors.request.use(
+    async (config) => {
+        try {
+            const token = await AsyncStorage.getItem("authToken");
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        } catch (error) {
+            console.error("Error retrieving token from AsyncStorage:", error);
+        }
+        return config;
+    },
+    (error) => Promise.reject(error),
+);
 
 // Response Interceptor
 apiClient.interceptors.response.use(

@@ -1,4 +1,5 @@
 import { User, getCurrentUser, logoutUser } from "@/services/authServices";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRootNavigationState, useRouter, useSegments } from "expo-router";
 import {
     ReactNode,
@@ -29,13 +30,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const checkUserLoggedIn = async () => {
             try {
-                const response = await getCurrentUser();
-                if (response.success && response.data.user) {
-                    setUser(response.data.user);
+                // Check if token exists in AsyncStorage
+                const token = await AsyncStorage.getItem("authToken");
+
+                if (token) {
+                    // Token exists, fetch user profile
+                    try {
+                        const response = await getCurrentUser();
+                        if (response.success && response.data.user) {
+                            setUser(response.data.user);
+                        } else {
+                            // Token exists but profile fetch failed, clear token
+                            await AsyncStorage.removeItem("authToken");
+                            setUser(null);
+                        }
+                    } catch (error) {
+                        // Token exists but profile fetch failed, clear token
+                        await AsyncStorage.removeItem("authToken");
+                        setUser(null);
+                    }
                 } else {
+                    // No token, user is not logged in
                     setUser(null);
                 }
             } catch (error) {
+                console.error("Error checking auth token:", error);
                 setUser(null);
             } finally {
                 setLoading(false);
@@ -66,6 +85,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
             console.error("Logout failed", error);
         } finally {
+            // Clear token from AsyncStorage (logoutUser already does this, but ensure it's cleared)
+            await AsyncStorage.removeItem("authToken");
             setUser(null);
             router.replace("/(auth)/login");
         }
