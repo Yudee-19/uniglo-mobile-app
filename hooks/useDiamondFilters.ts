@@ -1,4 +1,3 @@
-import { useAuth } from "@/context/AuthContext";
 import {
     Diamond,
     DiamondParams,
@@ -34,7 +33,6 @@ const initialFilterState: FilterState = {
 };
 
 export const useDiamondFilters = () => {
-    const { isAuthenticated } = useAuth();
     const [filters, setFilters] = useState<FilterState>(initialFilterState);
     const [diamonds, setDiamonds] = useState<Diamond[]>([]);
     const [loading, setLoading] = useState(false);

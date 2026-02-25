@@ -6,7 +6,7 @@ import {
     DiamondLab,
     DiamondShape,
 } from "@/types/diamond.types";
-import axios from "axios";
+import apiClient from "./api";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
@@ -285,7 +285,7 @@ export const searchDiamonds = async (
         console.log(
             `Making API request to: ${API_BASE_URL}${endpoint}?${queryParams.toString()}`,
         );
-        const response = await axios.get<ApiResponse<Diamond>>(
+        const response = await apiClient.get<ApiResponse<Diamond>>(
             `${API_BASE_URL}${endpoint}?${queryParams.toString()}`,
         );
 
@@ -307,7 +307,7 @@ export const fetchDiamondById = async (
     id: string,
 ): Promise<{ diamond: Diamond; similarDiamonds: string[] }> => {
     try {
-        const response = await axios.get<ApiResponse<Diamond>>(
+        const response = await apiClient.get<ApiResponse<Diamond>>(
             `${API_BASE_URL}/diamonds/search?searchTerm=${encodeURIComponent(id)}`,
         );
         const result = response.data;
