@@ -1,5 +1,5 @@
 import { User, getCurrentUser, logoutUser } from "@/services/authServices";
-import { useRouter, useSegments } from "expo-router";
+import { useRootNavigationState, useRouter, useSegments } from "expo-router";
 import {
     ReactNode,
     createContext,
@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const segments = useSegments();
+    const navigationState = useRootNavigationState();
 
     // Check if user is logged in on app load
     useEffect(() => {
@@ -44,21 +45,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         checkUserLoggedIn();
     }, []);
 
-    // Handle navigation based on auth state
+    // Handle navigation based on auth state - ONLY after navigation is ready
     useEffect(() => {
         if (loading) return;
+        if (!navigationState?.key) return; // Wait for navigator to be ready
 
         const inAuthGroup = segments[0] === "(auth)";
-        const inTabs = segments[0] === "(tabs)";
 
-        if (!user && !inAuthGroup && !inTabs) {
-            // Redirect to login by default
+        if (!user && !inAuthGroup) {
             router.replace("/(auth)/login");
         } else if (user && inAuthGroup) {
-            // Redirect to home if authenticated and in auth group
             router.replace("/(tabs)");
         }
-    }, [user, loading, segments]);
+    }, [user, loading, segments, navigationState?.key]);
 
     // Logout Function
     const logout = async () => {
@@ -68,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.error("Logout failed", error);
         } finally {
             setUser(null);
-            router.replace("/");
+            router.replace("/(auth)/login");
         }
     };
 

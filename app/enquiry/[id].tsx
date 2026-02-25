@@ -1,3 +1,4 @@
+import { AppHeader } from "@/components/shared/AppHeader";
 import {
     createDiamondInquiry,
     getUserQueries,
@@ -20,7 +21,6 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AppHeader } from "../(tabs)/_layout";
 
 function formatDateTime(dateStr: string): string {
     const date = new Date(dateStr);

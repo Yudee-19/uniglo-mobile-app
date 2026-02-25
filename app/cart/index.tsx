@@ -1,4 +1,5 @@
 import { DiamondCardSkeleton } from "@/components/inventory/DiamondCardSkeleton";
+import { AppHeader } from "@/components/shared/AppHeader";
 import {
     CartItem,
     clearCart,
@@ -28,7 +29,6 @@ import {
     PanGestureHandler,
 } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AppHeader } from "../(tabs)/_layout";
 
 // ── Non-interactive Diamond Card for Cart ─────────────────────────────────────
 

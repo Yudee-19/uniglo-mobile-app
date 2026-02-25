@@ -1,26 +1,12 @@
 import { useAuth } from "@/context/AuthContext";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import { useEffect } from "react";
 import { Image } from "react-native";
 
 export default function Index() {
-    const { isAuthenticated, loading } = useAuth();
-    const router = useRouter();
+    const { loading } = useAuth();
 
-    useEffect(() => {
-        if (!loading) {
-            if (isAuthenticated) {
-                // User is logged in, redirect to tabs
-                router.replace("/(tabs)");
-            } else {
-                // User is not logged in, redirect to login
-                router.replace("/(auth)/login");
-            }
-        }
-    }, [isAuthenticated, loading]);
-
-    // Show loading screen while checking auth state
+    // This is just a splash/loading screen now.
+    // AuthContext handles all navigation.
     return (
         <LinearGradient
             colors={["#2e1035", "#050208"]}

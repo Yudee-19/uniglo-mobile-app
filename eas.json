@@ -6,15 +6,24 @@
     "build": {
         "development": {
             "developmentClient": true,
-            "distribution": "internal"
+            "distribution": "internal",
+            "env": {
+                "EXPO_PUBLIC_API_BASE_URL": "https://uniglow-inventory-service-dev.caratlogic.com/api"
+            }
         },
         "preview": {
             "android": {
                 "buildType": "apk"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_BASE_URL": "https://uniglow-inventory-service-dev.caratlogic.com/api"
             }
         },
         "production": {
-            "autoIncrement": true
+            "autoIncrement": true,
+            "env": {
+                "EXPO_PUBLIC_API_BASE_URL": "https://uniglow-inventory-service-dev.caratlogic.com/api"
+            }
         }
     },
     "submit": {

@@ -1,3 +1,4 @@
+import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/context/AuthContext";
 import { getUserProfile, UserProfile } from "@/services/userServices";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,7 +14,6 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AppHeader } from "../(tabs)/_layout";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

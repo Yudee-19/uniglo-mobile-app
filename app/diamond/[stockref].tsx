@@ -1,3 +1,4 @@
+import { AppHeader } from "@/components/shared/AppHeader";
 import { addToCart, holdDiamond } from "@/services/cartServices";
 import { Diamond, fetchDiamondById } from "@/services/diamondService";
 import { createDiamondInquiry } from "@/services/inquiryServices";
@@ -21,7 +22,6 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AppHeader } from "../(tabs)/_layout";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
