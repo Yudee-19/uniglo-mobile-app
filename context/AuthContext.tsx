@@ -1,6 +1,8 @@
 import { User, getCurrentUser, logoutUser } from "@/services/authServices";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AxiosError } from "axios";
 import { useRootNavigationState, useRouter, useSegments } from "expo-router";
+
 import {
     ReactNode,
     createContext,
@@ -8,6 +10,7 @@ import {
     useEffect,
     useState,
 } from "react";
+import { DeviceEventEmitter } from "react-native";
 
 interface AuthContextType {
     user: User | null;
@@ -30,34 +33,54 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const checkUserLoggedIn = async () => {
             try {
-                // Check if token exists in AsyncStorage
+                // 1. Instantly check for token AND cached user profile
                 const token = await AsyncStorage.getItem("authToken");
+                const cachedUserString = await AsyncStorage.getItem("authUser");
 
                 if (token) {
-                    // Token exists, fetch user profile
+                    // 2. Hydrate state immediately if we have cached data
+                    if (cachedUserString) {
+                        setUser(JSON.parse(cachedUserString));
+                    }
+
+                    // 3. Unblock the UI immediately!
+                    setLoading(false);
+
+                    // 4. Fetch fresh data in the background silently
                     try {
                         const response = await getCurrentUser();
                         if (response.success && response.data.user) {
                             setUser(response.data.user);
-                        } else {
-                            // Token exists but profile fetch failed, clear token
-                            await AsyncStorage.removeItem("authToken");
-                            setUser(null);
+                            await AsyncStorage.setItem(
+                                "authUser",
+                                JSON.stringify(response.data.user),
+                            );
                         }
                     } catch (error) {
-                        // Token exists but profile fetch failed, clear token
-                        await AsyncStorage.removeItem("authToken");
-                        setUser(null);
+                        const axiosError = error as AxiosError;
+                        // If the server rejects the token (401), force a logout
+                        if (axiosError.response?.status === 401) {
+                            await AsyncStorage.multiRemove([
+                                "authToken",
+                                "authUser",
+                            ]);
+                            setUser(null);
+                        } else {
+                            // It's a network error (offline). Leave the cached user intact.
+                            console.log(
+                                "Offline mode: using cached user data.",
+                            );
+                        }
                     }
                 } else {
                     // No token, user is not logged in
+                    setLoading(false);
                     setUser(null);
                 }
             } catch (error) {
-                console.error("Error checking auth token:", error);
-                setUser(null);
-            } finally {
+                console.error("Error reading from AsyncStorage:", error);
                 setLoading(false);
+                setUser(null);
             }
         };
 
@@ -67,26 +90,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Handle navigation based on auth state - ONLY after navigation is ready
     useEffect(() => {
         if (loading) return;
-        if (!navigationState?.key) return; // Wait for navigator to be ready
+        if (!navigationState?.key) return;
 
         const inAuthGroup = segments[0] === "(auth)";
+        const inTabsGroup = segments[0] === "(tabs)";
 
         if (!user && !inAuthGroup) {
             router.replace("/(auth)/login");
-        } else if (user && inAuthGroup) {
+        } else if (user && !inTabsGroup) {
+            // Fixes the stuck splash screen bug by catching the root '/' route
             router.replace("/(tabs)");
         }
     }, [user, loading, segments, navigationState?.key]);
+
+    // Listen for 401 Unauthorized events from Axios
+    useEffect(() => {
+        const subscription = DeviceEventEmitter.addListener(
+            "EXPIRED_SESSION",
+            async () => {
+                console.log("Session expired globally. Forcing logout...");
+
+                // Wipe local storage
+                await AsyncStorage.multiRemove(["authToken", "authUser"]);
+
+                // Reset context state
+                setUser(null);
+
+                // Kick them back to the login screen
+                router.replace("/(auth)/login");
+            },
+        );
+
+        // Cleanup the listener when the provider unmounts
+        return () => {
+            subscription.remove();
+        };
+    }, []);
 
     // Logout Function
     const logout = async () => {
         try {
             await logoutUser();
         } catch (error) {
-            console.error("Logout failed", error);
+            console.error("Logout API failed, forcing local logout", error);
         } finally {
             // Clear token from AsyncStorage (logoutUser already does this, but ensure it's cleared)
-            await AsyncStorage.removeItem("authToken");
             setUser(null);
             router.replace("/(auth)/login");
         }

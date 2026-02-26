@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError, AxiosResponse } from "axios";
+import { DeviceEventEmitter } from "react-native";
 
 const BASE_URL =
     process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
@@ -36,6 +37,7 @@ apiClient.interceptors.response.use(
         if (error.response && error.response.status === 401) {
             console.log("Unauthorized! User needs to log in.");
             // Handle redirect in React Native differently
+            DeviceEventEmitter.emit("EXPIRED_SESSION");
         }
         return Promise.reject(error);
     },

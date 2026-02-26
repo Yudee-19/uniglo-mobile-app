@@ -8,7 +8,8 @@
             "developmentClient": true,
             "distribution": "internal",
             "env": {
-                "EXPO_PUBLIC_API_BASE_URL": "https://uniglow-inventory-service-dev.caratlogic.com/api"
+                "EXPO_PUBLIC_API_BASE_URL": "https://uniglow-inventory-service-dev.caratlogic.com/api",
+                "EXPO_PUBLIC_CSC_API_KEY": "91e55ec7d9fb89b66ceca04953166c802a9f68b4560b686ee1987b8e6aa035bd"
             }
         },
         "preview": {
@@ -16,13 +17,15 @@
                 "buildType": "apk"
             },
             "env": {
-                "EXPO_PUBLIC_API_BASE_URL": "https://uniglow-inventory-service-dev.caratlogic.com/api"
+                "EXPO_PUBLIC_API_BASE_URL": "https://uniglow-inventory-service-dev.caratlogic.com/api",
+                "EXPO_PUBLIC_CSC_API_KEY": "91e55ec7d9fb89b66ceca04953166c802a9f68b4560b686ee1987b8e6aa035bd"
             }
         },
         "production": {
             "autoIncrement": true,
             "env": {
-                "EXPO_PUBLIC_API_BASE_URL": "https://uniglow-inventory-service-dev.caratlogic.com/api"
+                "EXPO_PUBLIC_API_BASE_URL": "https://uniglow-inventory-service-dev.caratlogic.com/api",
+                "EXPO_PUBLIC_CSC_API_KEY": "91e55ec7d9fb89b66ceca04953166c802a9f68b4560b686ee1987b8e6aa035bd"
             }
         }
     },

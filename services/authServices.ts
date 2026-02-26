@@ -134,6 +134,10 @@ export const loginUser = async (
         // Store token in AsyncStorage
         if (response.data.success && response.data.data.token) {
             await AsyncStorage.setItem("authToken", response.data.data.token);
+            await AsyncStorage.setItem(
+                "authUser",
+                JSON.stringify(response.data.data.user),
+            );
         }
 
         return response.data;
@@ -167,11 +171,13 @@ export const logoutUser = async (): Promise<ApiSuccessResponse<null>> => {
 
         // Remove token from AsyncStorage
         await AsyncStorage.removeItem("authToken");
+        await AsyncStorage.removeItem("authUser");
 
         return response.data;
     } catch (error) {
         // Remove token even if API call fails
         await AsyncStorage.removeItem("authToken");
+        await AsyncStorage.removeItem("authUser");
         throw error;
     }
 };
