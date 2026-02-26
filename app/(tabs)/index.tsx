@@ -2,6 +2,7 @@ import CertifiedDiamondMarquee from "@/components/CertifiedDiamondMarquee";
 import HeroBannerCarousel from "@/components/HeroBannerCarousel";
 import { SHAPE_IMAGES, SHAPES } from "@/types/diamond.types";
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
     Image,
@@ -14,6 +15,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
+    const router = useRouter();
+
     return (
         <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
             {/* ─── Header ─── */}
@@ -41,7 +44,15 @@ export default function HomeScreen() {
                     {/* Overlapping Cards */}
                     <View className="flex-row justify-center gap-4 px-4 -mt-16">
                         {/* Labgrown Diamonds */}
-                        <TouchableOpacity className="bg-black w-[47%] rounded-xl p-5 items-center border border-white/20 shadow-lg">
+                        <TouchableOpacity
+                            className="bg-black w-[47%] rounded-xl p-5 items-center border border-white/20 shadow-lg"
+                            onPress={() =>
+                                router.push({
+                                    pathname: "/inventory",
+                                    params: { isNatural: "false" },
+                                })
+                            }
+                        >
                             <Image
                                 source={require("../../assets/shapes/heart.png")}
                                 className="w-20 h-24 mb-4"
@@ -58,7 +69,15 @@ export default function HomeScreen() {
                         </TouchableOpacity>
 
                         {/* Natural Diamonds */}
-                        <TouchableOpacity className="bg-black w-[47%] rounded-xl p-5 items-center border border-white/20 shadow-lg">
+                        <TouchableOpacity
+                            className="bg-black w-[47%] rounded-xl p-5 items-center border border-white/20 shadow-lg"
+                            onPress={() =>
+                                router.push({
+                                    pathname: "/inventory",
+                                    params: { isNatural: "true" },
+                                })
+                            }
+                        >
                             <Image
                                 source={require("../../assets/images/image1.png")}
                                 className="w-40 h-24 mb-4"
@@ -87,6 +106,12 @@ export default function HomeScreen() {
                             <TouchableOpacity
                                 key={shape.value}
                                 className="w-[22%] items-center mb-6"
+                                onPress={() =>
+                                    router.push({
+                                        pathname: "/inventory",
+                                        params: { shape: shape.value },
+                                    })
+                                }
                             >
                                 {SHAPE_IMAGES[shape.value] ? (
                                     <Image

@@ -5,7 +5,7 @@ import { useDiamondFilters } from "@/hooks/useDiamondFilters";
 import { CLARITIES, COLORS, SHAPES, SHAPE_IMAGES } from "@/types/diamond.types";
 import { Fontisto, Ionicons } from "@expo/vector-icons";
 import { Slider } from "@miblanchard/react-native-slider";
-import { Redirect } from "expo-router";
+import { Redirect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
     Animated,
@@ -35,6 +35,8 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function InventoryScreen() {
     const { isAuthenticated } = useAuth();
+    const params = useLocalSearchParams();
+
     const {
         filters,
         diamonds,
@@ -52,6 +54,20 @@ export default function InventoryScreen() {
     const [selectedSort, setSelectedSort] = useState("recent");
     const [refreshing, setRefreshing] = useState(false);
     const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+    useEffect(() => {
+        // Optional: Reset filters first so we don't mix old filters with the new click
+        // resetFilters();
+
+        if (params.isNatural !== undefined) {
+            updateFilter("isNatural", params.isNatural === "true");
+        }
+
+        if (params.shape) {
+            // Your shape filter expects an array, so we wrap the param in an array
+            updateFilter("shape", [params.shape as string]);
+        }
+    }, [params.isNatural, params.shape]);
 
     // Sync selectedSort with filter state
     useEffect(() => {
