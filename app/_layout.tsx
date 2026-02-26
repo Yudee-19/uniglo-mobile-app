@@ -1,4 +1,4 @@
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import {
     CormorantGaramond_400Regular,
     CormorantGaramond_600SemiBold,
@@ -24,7 +24,9 @@ import "./global.css";
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootLayoutContent() {
+    const { loading: authLoading } = useAuth(); //
+
     const [fontsLoaded, fontError] = useFonts({
         Inter_400Regular,
         Inter_600SemiBold,
@@ -40,29 +42,29 @@ export default function RootLayout() {
     });
 
     useEffect(() => {
-        if (fontsLoaded || fontError) {
+        if (fontsLoaded || (fontError && !authLoading)) {
             SplashScreen.hideAsync();
         }
-    }, [fontsLoaded, fontError]);
+    }, [fontsLoaded, fontError, authLoading]);
 
-    if (!fontsLoaded && !fontError) {
+    if ((!fontsLoaded && !fontError) || authLoading) {
         return null;
     }
 
     return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            </Stack>
+        </GestureHandlerRootView>
+    );
+}
+
+export default function RootLayout() {
+    return (
         <AuthProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-                <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen
-                        name="(tabs)"
-                        options={{ headerShown: false }}
-                    />
-                    {/* <Stack.Screen name="cart" options={{ headerShown: false }} />
-                    <Stack.Screen name="profile" options={{ headerShown: false }} />
-                    <Stack.Screen name="diamond" options={{ headerShown: false }} />
-                    <Stack.Screen name="(auth)" options={{ headerShown: false }} /> */}
-                </Stack>
-            </GestureHandlerRootView>
+            <RootLayoutContent />
         </AuthProvider>
     );
 }

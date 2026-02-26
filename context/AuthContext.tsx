@@ -1,7 +1,12 @@
 import { User, getCurrentUser, logoutUser } from "@/services/authServices";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosError } from "axios";
-import { useRootNavigationState, useRouter, useSegments } from "expo-router";
+import {
+    usePathname,
+    useRootNavigationState,
+    useRouter,
+    useSegments,
+} from "expo-router";
 
 import {
     ReactNode,
@@ -28,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const router = useRouter();
     const segments = useSegments();
     const navigationState = useRootNavigationState();
+    const pathname = usePathname();
 
     // Check if user is logged in on app load
     useEffect(() => {
@@ -93,15 +99,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!navigationState?.key) return;
 
         const inAuthGroup = segments[0] === "(auth)";
-        const inTabsGroup = segments[0] === "(tabs)";
 
         if (!user && !inAuthGroup) {
+            // User is NOT logged in -> send to login
             router.replace("/(auth)/login");
-        } else if (user && !inTabsGroup) {
-            // Fixes the stuck splash screen bug by catching the root '/' route
-            router.replace("/(tabs)");
+        } else if (user) {
+            // User IS logged in.
+            // If they are on the login screens OR at the blank root screen, push to tabs.
+            if (inAuthGroup || pathname === "/") {
+                router.replace("/(tabs)");
+            }
         }
-    }, [user, loading, segments, navigationState?.key]);
+    }, [user, loading, segments, pathname, navigationState?.key]);
 
     // Listen for 401 Unauthorized events from Axios
     useEffect(() => {
