@@ -1,4 +1,7 @@
-import { Feather } from "@expo/vector-icons";
+import CertifiedDiamondMarquee from "@/components/CertifiedDiamondMarquee";
+import HeroBannerCarousel from "@/components/HeroBannerCarousel";
+import { SHAPE_IMAGES, SHAPES } from "@/types/diamond.types";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
     Image,
@@ -20,21 +23,7 @@ export default function HomeScreen() {
                 className="bg-white"
             >
                 {/* ─── Hero Banner ─── */}
-                <View className="w-full h-64  justify-center px-3  overflow-hidden">
-                    {/* Background Image Placeholder */}
-                    <Image
-                        source={require("../../assets/images/banner/banner.jpeg")}
-                        className="w-full h-full object-cover  rounded-lg"
-                    />
-                </View>
-
-                {/* Pagination Dots */}
-                <View className="flex-row justify-center gap-2 py-4 bg-white">
-                    <View className="w-2 h-2 rounded-full bg-gray-300" />
-                    <View className="w-2 h-2 rounded-full bg-gray-800" />
-                    <View className="w-2 h-2 rounded-full bg-gray-300" />
-                    <View className="w-2 h-2 rounded-full bg-gray-300" />
-                </View>
+                <HeroBannerCarousel />
 
                 {/* ─── Main Categories ─── */}
                 <View className="bg-white pt-3 pb-8 px-3">
@@ -92,44 +81,41 @@ export default function HomeScreen() {
                     <Text className="text-xl font-serif text-[#2e1035] mb-6">
                         Search Diamond by Shape
                     </Text>
+
                     <View className="flex-row flex-wrap justify-between">
-                        {[
-                            "Round",
-                            "Oval",
-                            "Cushion",
-                            "Pear",
-                            "Princess",
-                            "Emerald",
-                            "Marquise",
-                        ].map((shape) => (
+                        {SHAPES.slice(0, 7).map((shape) => (
                             <TouchableOpacity
-                                key={shape}
+                                key={shape.value}
                                 className="w-[22%] items-center mb-6"
                             >
-                                <Image
-                                    source={{
-                                        uri: `https://via.placeholder.com/60/ffffff/000000?text=${shape[0]}`,
-                                    }}
-                                    className="w-14 h-14 mb-2"
-                                    resizeMode="contain"
-                                />
-                                <Text className="text-xs text-gray-700 font-medium">
-                                    {shape}
+                                {SHAPE_IMAGES[shape.value] ? (
+                                    <Image
+                                        source={SHAPE_IMAGES[shape.value]}
+                                        className="w-14 h-14 mb-2"
+                                        resizeMode="contain"
+                                    />
+                                ) : (
+                                    <View className="w-14 h-14 mb-2 items-center justify-center">
+                                        <Ionicons
+                                            name="diamond-outline"
+                                            size={24}
+                                            color="#6B7280"
+                                        />
+                                    </View>
+                                )}
+                                <Text className="text-xs text-gray-700 font-medium text-center">
+                                    {shape.label}
                                 </Text>
                             </TouchableOpacity>
                         ))}
-                        {/* View More Button */}
-                        <TouchableOpacity className="w-[22%] items-center mb-6 justify-center">
-                            <View className="w-14 h-14 rounded-full border border-[#D4AF37] items-center justify-center mb-2">
-                                <Feather
-                                    name="arrow-right"
+                        <TouchableOpacity className="w-[22%] items-center mb-6">
+                            <View className="w-14 h-14 mb-2 items-center justify-center border-2 border-primary-yellow-1 rounded-full">
+                                <Ionicons
+                                    name="arrow-forward-circle-sharp"
                                     size={24}
-                                    color="#D4AF37"
+                                    color="#bb923a"
                                 />
                             </View>
-                            <Text className="text-xs text-gray-700 font-medium">
-                                View More
-                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -139,29 +125,7 @@ export default function HomeScreen() {
                     <Text className="text-sm font-serif tracking-widest mb-8 text-gray-800 uppercase">
                         Certified Diamond Assurance
                     </Text>
-                    <View className="flex-row justify-center items-center gap-8 px-4">
-                        <Image
-                            source={{
-                                uri: "https://via.placeholder.com/80x40/ffffff/000000?text=IGI",
-                            }}
-                            className="w-20 h-12"
-                            resizeMode="contain"
-                        />
-                        <Image
-                            source={{
-                                uri: "https://via.placeholder.com/100x40/ffffff/000000?text=HRD",
-                            }}
-                            className="w-24 h-12"
-                            resizeMode="contain"
-                        />
-                        <Image
-                            source={{
-                                uri: "https://via.placeholder.com/80x40/ffffff/000000?text=GIA",
-                            }}
-                            className="w-20 h-12"
-                            resizeMode="contain"
-                        />
-                    </View>
+                    <CertifiedDiamondMarquee />
                 </View>
 
                 {/* ─── Uniglow Experience ─── */}
@@ -174,9 +138,7 @@ export default function HomeScreen() {
                     <TouchableOpacity className="mb-8">
                         <View className="w-full h-56 bg-gray-200 rounded-xl mb-4 overflow-hidden">
                             <Image
-                                source={{
-                                    uri: "https://via.placeholder.com/800x400/e5e7eb/a3a3a3",
-                                }}
+                                source={require("../../assets/images/recent-post.png")}
                                 className="w-full h-full"
                             />
                         </View>
@@ -196,9 +158,7 @@ export default function HomeScreen() {
                     <TouchableOpacity className="mb-8">
                         <View className="w-full h-56 bg-gray-200 rounded-xl mb-4 overflow-hidden">
                             <Image
-                                source={{
-                                    uri: "https://via.placeholder.com/800x400/e5e7eb/a3a3a3",
-                                }}
+                                source={require("../../assets/images/appointment.jpg")}
                                 className="w-full h-full"
                             />
                         </View>

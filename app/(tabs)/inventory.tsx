@@ -134,6 +134,13 @@ export default function InventoryScreen() {
         }, 1000);
     }, [resetFilters, showFilters, filterAnimation]);
 
+    const handleDiamondTypePress = (value: boolean) => {
+        updateFilter(
+            "isNatural",
+            filters.isNatural === value ? undefined : value,
+        );
+    };
+
     if (!isAuthenticated) {
         return <Redirect href="/(auth)/login" />;
     }
@@ -182,6 +189,49 @@ export default function InventoryScreen() {
                         overflow: "hidden",
                     }}
                 >
+                    {/* DiamondType Filter */}
+                    <View className="px-4 py-4 bg-white mb-2 flex-row items-center gap-4">
+                        <View className="flex-row w-full gap-2">
+                            <TouchableOpacity
+                                onPress={() => handleDiamondTypePress(true)}
+                                className={` flex-1  px-4 py-2 flex-row justify-center rounded-sm border ${
+                                    filters.isNatural === true
+                                        ? "border-primary-yellow-3 bg-yellow-50"
+                                        : "border-gray-300"
+                                }`}
+                            >
+                                <Text
+                                    className={`text-sm font-medium  ${
+                                        filters.isNatural === true
+                                            ? "text-yellow-700"
+                                            : "text-gray-700"
+                                    }`}
+                                >
+                                    Natural
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => handleDiamondTypePress(false)}
+                                className={`flex-1 px-4 py-2 rounded-sm border flex-row justify-center ${
+                                    filters.isNatural === false
+                                        ? "border-primary-yellow-3 bg-yellow-50"
+                                        : "border-gray-300"
+                                }`}
+                            >
+                                <Text
+                                    className={`text-sm font-medium ${
+                                        filters.isNatural === false
+                                            ? "text-yellow-700"
+                                            : "text-gray-700"
+                                    }`}
+                                >
+                                    Lab Grown
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
                     {/* Shape Selection */}
                     <View className="px-4 py-4 bg-white mb-2">
                         <Text className="text-sm font-semibold text-yellow-700 mb-3">
