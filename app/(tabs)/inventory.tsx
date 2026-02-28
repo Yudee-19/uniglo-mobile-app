@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
     Animated,
     Dimensions,
+    FlatList,
     Image,
     Modal,
     RefreshControl,
@@ -114,8 +115,8 @@ export default function InventoryScreen() {
     const handleSortChange = (value: string) => {
         setSelectedSort(value);
         if (value === "recent") {
-            updateFilter("sortBy", undefined);
-            updateFilter("sortOrder", undefined);
+            updateFilter("sortBy", "createdAt");
+            updateFilter("sortOrder", "desc");
         } else {
             const [field, order] = value.split("-");
             updateFilter("sortBy", field);
@@ -557,17 +558,25 @@ export default function InventoryScreen() {
 
                 {/* Diamond List */}
                 <View className="px-4 py-2">
-                    {loading ? (
-                        <>
-                            {[...Array(5)].map((_, index) => (
-                                <DiamondCardSkeleton key={index} />
-                            ))}
-                        </>
-                    ) : (
-                        diamonds.map((diamond) => (
-                            <DiamondCard key={diamond._id} diamond={diamond} />
-                        ))
-                    )}
+                    <FlatList
+                        data={loading ? Array.from({ length: 5 }) : diamonds}
+                        keyExtractor={(item, index) =>
+                            loading ? String(index) : (item as any)._id
+                        }
+                        renderItem={({ item }) =>
+                            loading ? (
+                                <DiamondCardSkeleton />
+                            ) : (
+                                <DiamondCard diamond={item as any} />
+                            )
+                        }
+                        contentContainerStyle={{
+                            paddingHorizontal: 0,
+                            paddingVertical: 0,
+                        }}
+                        nestedScrollEnabled
+                        scrollEnabled={false}
+                    />
                 </View>
             </ScrollView>
 

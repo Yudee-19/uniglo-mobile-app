@@ -28,8 +28,8 @@ const initialFilterState: FilterState = {
     isNatural: undefined,
     colorType: undefined,
     searchTerm: undefined,
-    sortBy: undefined,
-    sortOrder: undefined,
+    sortBy: "createdAt",
+    sortOrder: "desc",
 };
 
 export const useDiamondFilters = () => {
@@ -60,8 +60,8 @@ export const useDiamondFilters = () => {
             filters.isNatural !== undefined ||
             filters.colorType !== undefined ||
             filters.searchTerm !== undefined ||
-            filters.sortBy !== undefined ||
-            filters.sortOrder !== undefined
+            filters.sortBy !== "createdAt" ||
+            filters.sortOrder !== "desc"
         );
     }, [filters]);
 

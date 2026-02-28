@@ -34,6 +34,13 @@ export type DiamondColor =
     | "X"
     | "Y"
     | "Z"
+    | "N-O"
+    | "OP"
+    | "QR"
+    | "ST"
+    | "UV"
+    | "WX"
+    | "YZ"
     | "E-F";
 
 export type DiamondClarity =
@@ -102,6 +109,28 @@ export const COLORS: DiamondColor[] = [
     "I",
     "J",
     "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
+    "N-O",
+    "OP",
+    "QR",
+    "ST",
+    "UV",
+    "WX",
+    "YZ",
 ];
 
 export const CLARITIES: DiamondClarity[] = [

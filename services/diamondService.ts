@@ -132,6 +132,8 @@ export interface Diamond {
     // --- Media ---
     webLink: string; // Image URL
     videoLink: string; // Video URL
+    imageUrls?: string[];
+    videoUrls?: string[];
 
     // --- Pairing ---
     pairStockRef: string;

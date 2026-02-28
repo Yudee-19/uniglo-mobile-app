@@ -1,4 +1,5 @@
 import { AppHeader } from "@/components/shared/AppHeader";
+import { DiamondImage } from "@/components/shared/DiamondMedia";
 import { addToCart, holdDiamond } from "@/services/cartServices";
 import { Diamond, fetchDiamondById } from "@/services/diamondService";
 import { createDiamondInquiry } from "@/services/inquiryServices";
@@ -275,19 +276,16 @@ export default function DiamondDetailScreen() {
                 >
                     {/* ── Diamond Image ── */}
                     <View className="w-full aspect-square bg-gray-50 items-center justify-center border-b border-gray-100">
-                        {diamond.webLink ? (
-                            <Image
-                                source={{ uri: diamond.webLink }}
-                                className="w-full h-full"
-                                resizeMode="contain"
+                        {/* ── Diamond Image ── */}
+                        <View className="w-full aspect-square bg-gray-50 items-center justify-center border-b border-gray-100">
+                            <DiamondImage
+                                diamond={diamond}
+                                showdefault={false}
+                                showCarousel={true}
+                                // showStill={true}
+                                showVideo={false} // Set to true if you want the 360 viewer to take precedence
                             />
-                        ) : (
-                            <Ionicons
-                                name="diamond-outline"
-                                size={100}
-                                color="#E5E7EB"
-                            />
-                        )}
+                        </View>
                     </View>
 
                     <View className="px-4 pt-4">
