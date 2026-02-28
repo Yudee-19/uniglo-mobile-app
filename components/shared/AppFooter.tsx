@@ -97,67 +97,90 @@ export function AppFooter() {
                     </View>
 
                     {/* Get In Touch */}
-                    <View className="w-[45%] mb-6">
+                    <View className="w-full mb-6">
                         <Text className="text-[#D4AF37] text-xl mb-4 font-lora">
                             Get In Touch
                         </Text>
-                        <View className="flex-row items-start mb-3">
-                            <Ionicons
-                                name="location-sharp"
-                                size={20}
-                                color="#D4AF37"
-                                style={{ marginRight: 8 }}
-                            />
-                            <Text className="text-white/80 text-base font-lora">
-                                <Text className=" font-loraSemibold">
-                                    Location:
-                                </Text>
-                                {"\n"}
-                                Hoveniersstraat 30, Suite 662/Bus 250{"\n"}
-                                2018 Antwerp
-                            </Text>
-                        </View>
-                        <View className="flex-row items-center mb-3">
-                            <Ionicons
-                                name="mail"
-                                size={20}
-                                color="#D4AF37"
-                                style={{ marginRight: 8 }}
-                            />
-                            <Text
-                                className="text-white/80 text-base font-lora"
-                                onPress={() =>
-                                    Linking.openURL(
-                                        "mailto:suraj@uniglodiamonds.com",
-                                    )
-                                }
-                            >
-                                <Text className="font-semibold font-loraSemibold">
-                                    Email:
-                                </Text>
-                                {"\n"}
-                                suraj@uniglodiamonds.com
-                            </Text>
-                        </View>
-                        <View className="flex-row items-center mb-3">
-                            <Ionicons
-                                name="call"
-                                size={20}
-                                color="#D4AF37"
-                                style={{ marginRight: 8 }}
-                            />
-                            <Text
-                                className="text-white/80 text-base font-lora"
-                                onPress={() =>
-                                    Linking.openURL("tel:+32473565758")
-                                }
-                            >
-                                <Text className="font-semibold font-loraSemibold">
-                                    Phone:
-                                </Text>
-                                {"\n"}
-                                +32 03 500 91 07
-                            </Text>
+                        <View className="flex-row flex-wrap gap-1 justify-between items-start mb-3">
+                            <View className="w-[45%] ">
+                                <View className="flex-row items-start mb-3">
+                                    <Ionicons
+                                        name="location-sharp"
+                                        size={20}
+                                        color="#D4AF37"
+                                        style={{ marginRight: 8 }}
+                                    />
+                                    <Text className="text-white/80 text-base font-lora">
+                                        <Text className=" font-loraSemibold">
+                                            Location:
+                                        </Text>
+                                        {"\n"}
+                                        Hoveniersstraat 30, Suite 662/Bus 250
+                                        {"\n"}
+                                        2018 Antwerp
+                                    </Text>
+                                </View>
+                            </View>
+                            <View className="w-[45%]  ">
+                                <View className="flex-col items-start mb-3 -mt-1">
+                                    <View className="flex-row items-start ">
+                                        <Ionicons
+                                            name="mail"
+                                            size={20}
+                                            color="#D4AF37"
+                                            style={{ marginRight: 8 }}
+                                        />
+                                        <Text
+                                            className="text-white/80 text-base font-lora"
+                                            onPress={() =>
+                                                Linking.openURL(
+                                                    "mailto:suraj@uniglodiamonds.com",
+                                                )
+                                            }
+                                        >
+                                            <Text className="font-semibold font-loraSemibold">
+                                                Email:
+                                            </Text>
+                                        </Text>
+                                    </View>
+                                    <Text
+                                        className="text-white/80 text-base font-lora"
+                                        onPress={() =>
+                                            Linking.openURL(
+                                                "mailto:suraj@uniglodiamonds.com",
+                                            )
+                                        }
+                                    >
+                                        {" "}
+                                        suraj@uniglodiamonds.com
+                                    </Text>
+                                </View>
+                                <View className="flex-col items-start mb-3">
+                                    <View className="flex-row items-start ">
+                                        <Ionicons
+                                            name="call"
+                                            size={20}
+                                            color="#D4AF37"
+                                            style={{ marginRight: 8 }}
+                                        />
+                                        <Text
+                                            className="text-white/80 text-base font-lora"
+                                            onPress={() =>
+                                                Linking.openURL(
+                                                    "tel:+32473565758",
+                                                )
+                                            }
+                                        >
+                                            <Text className="font-semibold font-loraSemibold">
+                                                Phone:
+                                            </Text>
+                                        </Text>
+                                    </View>
+                                    <Text className="text-white/80 text-base font-lora">
+                                        +32 03 500 91 07
+                                    </Text>
+                                </View>
+                            </View>
                         </View>
                     </View>
                 </View>

@@ -47,6 +47,8 @@ export default function InventoryScreen() {
         updateFilter,
         resetFilters,
         hasActiveFilters,
+        page,
+        setPage,
     } = useDiamondFilters();
 
     const [showFilters, setShowFilters] = useState(false);
@@ -55,6 +57,20 @@ export default function InventoryScreen() {
     const [selectedSort, setSelectedSort] = useState("recent");
     const [refreshing, setRefreshing] = useState(false);
     const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+    // Add a ref for the ScrollView
+    const scrollViewRef = useRef<ScrollView>(null);
+
+    // Calculate total pages (based on the limit: 25 in your useDiamondFilters)
+    const totalPages = Math.max(1, Math.ceil(totalCount / 25));
+
+    // Create a handler to change pages and scroll to the top
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setPage(newPage);
+            // Scroll back to the top of the list
+            scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+        }
+    };
 
     useEffect(() => {
         // Optional: Reset filters first so we don't mix old filters with the new click
@@ -189,6 +205,7 @@ export default function InventoryScreen() {
             </View>
 
             <ScrollView
+                ref={scrollViewRef}
                 className="flex-1 bg-gray-50"
                 refreshControl={
                     <RefreshControl
@@ -587,6 +604,56 @@ export default function InventoryScreen() {
                         nestedScrollEnabled
                         scrollEnabled={false}
                     />
+                    {/* Pagination Controls */}
+                    {!loading && totalCount > 0 && (
+                        <View className="flex-row justify-between items-center mt-6 mb-4">
+                            <TouchableOpacity
+                                onPress={() => handlePageChange(page - 1)}
+                                disabled={page === 1}
+                                className={`px-4 py-2 rounded-md ${
+                                    page === 1
+                                        ? "bg-gray-200"
+                                        : "bg-primary-purple border border-[#49214c]"
+                                }`}
+                                style={
+                                    page !== 1
+                                        ? { backgroundColor: "#49214c" }
+                                        : {}
+                                }
+                            >
+                                <Text
+                                    className={`font-medium ${page === 1 ? "text-gray-400" : "text-white"}`}
+                                >
+                                    Previous
+                                </Text>
+                            </TouchableOpacity>
+
+                            <Text className="text-gray-600 font-medium">
+                                Page {page} of {totalPages}
+                            </Text>
+
+                            <TouchableOpacity
+                                onPress={() => handlePageChange(page + 1)}
+                                disabled={page >= totalPages}
+                                className={`px-4 py-2 rounded-md ${
+                                    page >= totalPages
+                                        ? "bg-gray-200"
+                                        : "bg-primary-purple border border-[#49214c]"
+                                }`}
+                                style={
+                                    page < totalPages
+                                        ? { backgroundColor: "#49214c" }
+                                        : {}
+                                }
+                            >
+                                <Text
+                                    className={`font-medium ${page >= totalPages ? "text-gray-400" : "text-white"}`}
+                                >
+                                    Next
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
             </ScrollView>
 

@@ -5,7 +5,14 @@ import { SHAPE_IMAGES, SHAPES } from "@/types/diamond.types";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+    Image,
+    Linking,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
@@ -42,11 +49,11 @@ export default function HomeScreen() {
                                 })
                             }
                         >
-                            <Image
+                            {/* <Image
                                 source={require("../../assets/shapes/heart.png")}
                                 className="w-20 h-24 mb-4"
                                 resizeMode="contain"
-                            />
+                            /> */}
                             <Text className="text-white text-sm text-center mb-3 font-serif">
                                 Labgrown Diamonds
                             </Text>
@@ -67,11 +74,11 @@ export default function HomeScreen() {
                                 })
                             }
                         >
-                            <Image
+                            {/* <Image
                                 source={require("../../assets/images/image1.png")}
                                 className="w-40 h-24 mb-4"
                                 resizeMode="contain"
-                            />
+                            /> */}
                             <Text className="text-white text-sm text-center mb-3 font-serif">
                                 Natural Diamonds
                             </Text>
@@ -152,7 +159,14 @@ export default function HomeScreen() {
                 {/* ─── Uniglow Experience ─── */}
                 <View className="bg-white px-4 py-8">
                     {/* Experience Item 2 */}
-                    <TouchableOpacity className="mb-8">
+                    <TouchableOpacity
+                        className="mb-8"
+                        onPress={() => {
+                            Linking.openURL(
+                                `https://www.uniglodiamonds.com/contact-us`,
+                            );
+                        }}
+                    >
                         <View className="w-full h-56 bg-gray-200 rounded-xl mb-4 overflow-hidden">
                             <Image
                                 source={require("../../assets/images/appointment.jpg")}
