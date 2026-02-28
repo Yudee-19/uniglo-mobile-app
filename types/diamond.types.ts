@@ -1,6 +1,6 @@
 export type DiamondShape =
     | "RD" // Round
-    | "PR" // Princess
+    | "PC" // Princess
     | "PS" // Pear
     | "OV" // Oval
     | "EM" // Emerald
@@ -8,7 +8,10 @@ export type DiamondShape =
     | "MQ" // Marquise
     | "RA" // Radiant
     | "HT" // Heart
-    | "AS"; // Asscher
+    | "Asscher" // Asscher
+    | "OEB" // European
+    | "OMB" // Old Mine
+    | "Other"; // Other
 
 export type DiamondColor =
     | "D"
@@ -88,7 +91,7 @@ export type DiamondLab = "GIA" | "IGI" | "HRD" | "OTHERS";
 
 export const SHAPES: { value: DiamondShape; label: string }[] = [
     { value: "RD", label: "Round" },
-    { value: "PR", label: "Princess" },
+    { value: "PC", label: "Princess" },
     { value: "PS", label: "Pear" },
     { value: "OV", label: "Oval" },
     { value: "EM", label: "Emerald" },
@@ -96,7 +99,10 @@ export const SHAPES: { value: DiamondShape; label: string }[] = [
     { value: "MQ", label: "Marquise" },
     { value: "RA", label: "Radiant" },
     { value: "HT", label: "Heart" },
-    { value: "AS", label: "Asscher" },
+    { value: "Asscher", label: "Asscher" },
+    { value: "OEB", label: "European" },
+    { value: "OMB", label: "Old Mine" },
+    { value: "Other", label: "Other" },
 ];
 
 export const COLORS: DiamondColor[] = [
@@ -150,13 +156,15 @@ export const CARAT_RANGES = [{ label: "1.20-5.00", min: 1.2, max: 5.0 }];
 
 export const SHAPE_IMAGES: Record<string, any> = {
     RD: require("@/assets/shapes/round-diamond.png"),
-    PR: require("@/assets/shapes/princess-diamond.png"),
+    PC: require("@/assets/shapes/princess-diamond.png"),
     PS: require("@/assets/shapes/pear-diamond.png"),
     OV: require("@/assets/shapes/Oval-Diamond.png"),
     EM: require("@/assets/shapes/emerald-diamond.png"),
     MQ: require("@/assets/shapes/marquise-diamond.png"),
     HT: require("@/assets/shapes/heart.png"),
-    RA: require("@/assets/shapes/radiant-diamond.png"),
-    AS: require("@/assets/shapes/asscher-diamond.png"),
+    Other: require("@/assets/shapes/radiant-diamond.png"),
+    Asscher: require("@/assets/shapes/asscher-diamond.png"),
     CU: require("@/assets/shapes/cushion-diamond.png"),
+    OMB: require("@/assets/shapes/old-mine-diamond.png"),
+    OEB: require("@/assets/shapes/old-european-diamond.png"),
 };

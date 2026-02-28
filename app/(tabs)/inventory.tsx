@@ -250,8 +250,8 @@ export default function InventoryScreen() {
                     </View>
 
                     {/* Shape Selection */}
-                    <View className="px-4 py-4 bg-white mb-2">
-                        <Text className="text-sm font-semibold text-yellow-700 mb-3">
+                    <View className="px-4 py-2 bg-white mb-2">
+                        <Text className="text-sm font-semibold text-yellow-700 mb-1">
                             SELECT SHAPE
                         </Text>
                         <ScrollView
@@ -259,45 +259,49 @@ export default function InventoryScreen() {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={{
                                 gap: 8,
-                                paddingVertical: 4,
+                                paddingVertical: 1,
                             }}
                         >
-                            {SHAPES.map((shape) => (
-                                <TouchableOpacity
-                                    key={shape.value}
-                                    onPress={() =>
-                                        toggleFilter("shape", shape.value)
-                                    }
-                                    className={`w-20 aspect-square items-center justify-center rounded-lg border-2 ${
-                                        filters.shape.includes(shape.value)
-                                            ? "border-primary-yellow-3 bg-yellow-50"
-                                            : "border-gray-300"
-                                    }`}
-                                >
-                                    {SHAPE_IMAGES[shape.value] ? (
-                                        <Image
-                                            source={SHAPE_IMAGES[shape.value]}
-                                            className="w-12 h-12"
-                                            resizeMode="contain"
-                                        />
-                                    ) : (
-                                        <Ionicons
-                                            name="diamond-outline"
-                                            size={24}
-                                            color="#9CA3AF"
-                                        />
-                                    )}
-                                    {/* <Text className="text-xs text-center mt-1">
+                            {SHAPES.filter((shape) => shape.value !== "RA").map(
+                                (shape) => (
+                                    <TouchableOpacity
+                                        key={shape.value}
+                                        onPress={() =>
+                                            toggleFilter("shape", shape.value)
+                                        }
+                                        className={`w-20 aspect-square items-center justify-center rounded-lg border-2 ${
+                                            filters.shape.includes(shape.value)
+                                                ? "border-primary-yellow-3 bg-yellow-50"
+                                                : "border-gray-300"
+                                        }`}
+                                    >
+                                        {SHAPE_IMAGES[shape.value] ? (
+                                            <Image
+                                                source={
+                                                    SHAPE_IMAGES[shape.value]
+                                                }
+                                                className="w-12 h-12"
+                                                resizeMode="contain"
+                                            />
+                                        ) : (
+                                            <Ionicons
+                                                name="diamond-outline"
+                                                size={24}
+                                                color="#9CA3AF"
+                                            />
+                                        )}
+                                        {/* <Text className="text-xs text-center mt-1">
                                         {shape.label}
                                     </Text> */}
-                                </TouchableOpacity>
-                            ))}
+                                    </TouchableOpacity>
+                                ),
+                            )}
                         </ScrollView>
                     </View>
 
                     {/* Carat Weight */}
-                    <View className="px-4 py-4 bg-white mb-2">
-                        <View className="flex-row justify-between items-center mb-3">
+                    <View className="px-4 py-2 bg-white mb-2">
+                        <View className="flex-row justify-between items-center mb-1">
                             <Text className="text-sm font-semibold text-yellow-700">
                                 CARAT WEIGHT
                             </Text>
@@ -332,8 +336,8 @@ export default function InventoryScreen() {
                     </View>
 
                     {/* Color */}
-                    <View className="px-4 py-4 bg-white mb-2">
-                        <Text className="text-sm font-semibold text-yellow-700 mb-3">
+                    <View className="px-4 py-2 bg-white mb-2">
+                        <Text className="text-sm font-semibold text-yellow-700 mb-1">
                             COLOR
                         </Text>
                         <ScrollView
@@ -341,7 +345,7 @@ export default function InventoryScreen() {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={{
                                 gap: 8,
-                                paddingVertical: 4,
+                                paddingVertical: 1,
                             }}
                         >
                             {COLORS.map((color) => (
@@ -369,8 +373,8 @@ export default function InventoryScreen() {
                     </View>
 
                     {/* Clarity */}
-                    <View className="px-4 py-4 bg-white mb-2">
-                        <Text className="text-sm font-semibold text-yellow-700 mb-3">
+                    <View className="px-4 py-2 bg-white mb-2">
+                        <Text className="text-sm font-semibold text-yellow-700 mb-1">
                             CLARITY
                         </Text>
                         <ScrollView
@@ -378,7 +382,7 @@ export default function InventoryScreen() {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={{
                                 gap: 8,
-                                paddingVertical: 4,
+                                paddingVertical: 1,
                             }}
                         >
                             {CLARITIES.map((clarity) => (
@@ -408,8 +412,8 @@ export default function InventoryScreen() {
                     </View>
 
                     {/* Finish */}
-                    <View className="px-4 py-4 bg-white mb-2">
-                        <Text className="text-sm font-semibold text-yellow-700 mb-3">
+                    <View className="px-4 py-2 bg-white mb-2">
+                        <Text className="text-sm font-semibold text-yellow-700 mb-1">
                             FINISH
                         </Text>
                         <ScrollView
@@ -417,7 +421,7 @@ export default function InventoryScreen() {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={{
                                 gap: 8,
-                                paddingVertical: 4,
+                                paddingVertical: 1,
                             }}
                         >
                             {[
@@ -555,6 +559,12 @@ export default function InventoryScreen() {
                         </TouchableOpacity>
                     </View>
                 </View>
+                {/* <TextInput
+                    placeholder="This is a test input to check keyboard behavior"
+                    className="h-10 bg-white mx-4 mb-4 px-3 rounded-md border border-gray-300"
+                    value={filters.searchTerm ?? ""}
+                    onChangeText={(text) => updateFilter("searchTerm", text)}
+                ></TextInput> */}
 
                 {/* Diamond List */}
                 <View className="px-4 py-2">
