@@ -5,6 +5,18 @@ import { DeviceEventEmitter } from "react-native";
 const BASE_URL =
     process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
 
+// ── Session-expiry guard ──
+// Prevents multiple EXPIRED_SESSION events from flooding the app
+// when several API calls fail with 401 simultaneously.
+let isSessionExpired = false;
+
+/**
+ * Call after a successful login to re-enable 401 detection.
+ */
+export const resetSessionExpiredFlag = () => {
+    isSessionExpired = false;
+};
+
 const apiClient = axios.create({
     baseURL: BASE_URL,
     headers: {
@@ -15,6 +27,10 @@ const apiClient = axios.create({
 // Request Interceptor - Attach Bearer token from AsyncStorage
 apiClient.interceptors.request.use(
     async (config) => {
+        // Skip attaching expired token — avoids unnecessary 401 responses
+        if (isSessionExpired) {
+            return config;
+        }
         try {
             const token = await AsyncStorage.getItem("authToken");
             if (token) {
@@ -35,9 +51,11 @@ apiClient.interceptors.response.use(
     },
     (error: AxiosError) => {
         if (error.response && error.response.status === 401) {
-            console.log("Unauthorized! User needs to log in.");
-            // Handle redirect in React Native differently
-            DeviceEventEmitter.emit("EXPIRED_SESSION");
+            if (!isSessionExpired) {
+                isSessionExpired = true;
+                console.log("Unauthorized! Session expired — emitting once.");
+                DeviceEventEmitter.emit("EXPIRED_SESSION");
+            }
         }
         return Promise.reject(error);
     },

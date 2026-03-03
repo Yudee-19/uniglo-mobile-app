@@ -1,4 +1,5 @@
 import { User, getCurrentUser, logoutUser } from "@/services/authServices";
+import { resetSessionExpiredFlag } from "@/services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosError } from "axios";
 import {
@@ -13,6 +14,7 @@ import {
     createContext,
     useContext,
     useEffect,
+    useRef,
     useState,
 } from "react";
 import { DeviceEventEmitter } from "react-native";
@@ -34,6 +36,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const segments = useSegments();
     const navigationState = useRootNavigationState();
     const pathname = usePathname();
+
+    // Guard: prevents duplicate session-expiry handling
+    const isLoggingOut = useRef(false);
 
     // Check if user is logged in on app load
     useEffect(() => {
@@ -64,13 +69,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         }
                     } catch (error) {
                         const axiosError = error as AxiosError;
-                        // If the server rejects the token (401), force a logout
                         if (axiosError.response?.status === 401) {
-                            await AsyncStorage.multiRemove([
-                                "authToken",
-                                "authUser",
-                            ]);
-                            setUser(null);
+                            // The EXPIRED_SESSION event handler already takes
+                            // care of cleanup & navigation — nothing extra needed here.
+                            // Just make sure local state is consistent.
+                            if (!isLoggingOut.current) {
+                                await AsyncStorage.multiRemove([
+                                    "authToken",
+                                    "authUser",
+                                ]);
+                                setUser(null);
+                            }
                         } else {
                             // It's a network error (offline). Leave the cached user intact.
                             console.log(
@@ -112,21 +121,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [user, loading, segments, pathname, navigationState?.key]);
 
-    // Listen for 401 Unauthorized events from Axios
+    // Listen for 401 Unauthorized events from Axios (fires at most once
+    // thanks to the isSessionExpired flag in api.ts)
     useEffect(() => {
         const subscription = DeviceEventEmitter.addListener(
             "EXPIRED_SESSION",
             async () => {
+                // Guard: if we are already processing a logout, skip
+                if (isLoggingOut.current) return;
+                isLoggingOut.current = true;
+
                 console.log("Session expired globally. Forcing logout...");
 
                 // Wipe local storage
                 await AsyncStorage.multiRemove(["authToken", "authUser"]);
 
-                // Reset context state
+                // Reset context state — the navigation useEffect above will
+                // detect user === null and redirect to /(auth)/login, so we
+                // do NOT call router.replace here to avoid competing navigations.
                 setUser(null);
-
-                // Kick them back to the login screen
-                router.replace("/(auth)/login");
             },
         );
 
@@ -136,8 +149,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         };
     }, []);
 
-    // Logout Function
+    // Logout Function (user-initiated)
     const logout = async () => {
+        // Prevent the 401 interceptor from also firing EXPIRED_SESSION
+        isLoggingOut.current = true;
+
         try {
             await logoutUser();
         } catch (error) {
@@ -145,6 +161,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             // Clear token from AsyncStorage (logoutUser already does this, but ensure it's cleared)
             setUser(null);
+
+            // Reset guards so the next login cycle works cleanly
+            isLoggingOut.current = false;
+            resetSessionExpiredFlag();
+
             router.replace("/(auth)/login");
         }
     };

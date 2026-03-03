@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosError } from "axios";
-import apiClient from "./api";
+import apiClient, { resetSessionExpiredFlag } from "./api";
 
 export interface User {
     _id: string;
@@ -138,6 +138,8 @@ export const loginUser = async (
                 "authUser",
                 JSON.stringify(response.data.data.user),
             );
+            // New session — allow 401 detection again
+            resetSessionExpiredFlag();
         }
 
         return response.data;
