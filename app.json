@@ -19,7 +19,7 @@
             "edgeToEdgeEnabled": true,
             "predictiveBackGestureEnabled": false,
             "softwareKeyboardLayoutMode": "resize",
-            "package": "com.anonymous.UnigloDiamonds"
+            "package": "com.Uniglo.UnigloDiamonds"
         },
         "web": {
             "output": "static",

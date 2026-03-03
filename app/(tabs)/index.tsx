@@ -54,9 +54,15 @@ export default function HomeScreen() {
                                 className="w-20 h-24 mb-4"
                                 resizeMode="contain"
                             /> */}
-                            <Text className="text-white text-sm text-center mb-3 font-serif">
-                                Labgrown Diamonds
-                            </Text>
+                            <View className="flex flex-col justify-center items-center">
+                                <Text className="text-white text-sm text-center mb-3 font-serif">
+                                    Labgrown
+                                </Text>
+                                <Text className="text-white text-sm text-center mb-3 font-serif">
+                                    Diamonds
+                                </Text>
+                            </View>
+
                             <Feather
                                 name="arrow-right-circle"
                                 size={20}
@@ -79,9 +85,14 @@ export default function HomeScreen() {
                                 className="w-40 h-24 mb-4"
                                 resizeMode="contain"
                             /> */}
-                            <Text className="text-white text-sm text-center mb-3 font-serif">
-                                Natural Diamonds
-                            </Text>
+                            <View className="flex flex-col justify-center items-center">
+                                <Text className="text-white text-sm text-center mb-3 font-serif">
+                                    Natural
+                                </Text>
+                                <Text className="text-white text-sm text-center mb-3 font-serif">
+                                    Diamonds
+                                </Text>
+                            </View>
                             <Feather
                                 name="arrow-right-circle"
                                 size={20}
