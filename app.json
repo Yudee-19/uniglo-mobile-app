@@ -45,8 +45,9 @@
         "extra": {
             "router": {},
             "eas": {
-                "projectId": "508cb76b-24e3-494d-93ac-63e228a26daa"
+                "projectId": "5c11c11b-a247-48b5-b525-cc08cdf87535"
             }
-        }
+        },
+        "owner": "uniglo-diamonds"
     }
 }
