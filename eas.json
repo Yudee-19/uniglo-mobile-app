@@ -31,6 +31,12 @@
         }
     },
     "submit": {
-        "production": {}
+        "production": {
+            "ios": {
+                "appleId": "kevalai24@gmail.com",
+                "ascAppId": "6760025753",
+                "appleTeamId": "KCJH55HP6Y"
+            }
+        }
     }
 }
