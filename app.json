@@ -1,63 +1,63 @@
 {
-  "expo": {
-    "name": "Uniglo Diamonds",
-    "slug": "UnigloDiamonds",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
-    "scheme": "uniglo",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.Uniglo.UnigloDiamonds",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#26062b",
-        "foregroundImage": "./assets/images/icon-transparent.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "softwareKeyboardLayoutMode": "resize",
-      "package": "com.Uniglo.UnigloDiamonds"
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/logo.png",
-      "bundler": "metro"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/logo.png",
-          "imageWidth": 150,
-          "resizeMode": "contain",
-          "backgroundColor": "#49214c"
+    "expo": {
+        "name": "Uniglo Diamonds",
+        "slug": "UnigloDiamonds",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/images/logo.png",
+        "scheme": "uniglo",
+        "userInterfaceStyle": "automatic",
+        "newArchEnabled": true,
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.Uniglo.UnigloDiamonds",
+            "infoPlist": {
+                "ITSAppUsesNonExemptEncryption": false
+            }
+        },
+        "android": {
+            "adaptiveIcon": {
+                "backgroundColor": "#26062b",
+                "foregroundImage": "./assets/images/icon-transparent.png"
+            },
+            "edgeToEdgeEnabled": true,
+            "predictiveBackGestureEnabled": false,
+            "softwareKeyboardLayoutMode": "resize",
+            "package": "com.Uniglo.UnigloDiamonds"
+        },
+        "web": {
+            "output": "static",
+            "favicon": "./assets/images/logo.png",
+            "bundler": "metro"
+        },
+        "plugins": [
+            "expo-router",
+            [
+                "expo-splash-screen",
+                {
+                    "image": "./assets/images/logo.png",
+                    "imageWidth": 150,
+                    "resizeMode": "contain",
+                    "backgroundColor": "#49214c"
+                }
+            ]
+        ],
+        "experiments": {
+            "typedRoutes": true,
+            "reactCompiler": true
+        },
+        "extra": {
+            "router": {},
+            "eas": {
+                "projectId": "5c11c11b-a247-48b5-b525-cc08cdf87535"
+            }
+        },
+        "owner": "uniglo-diamonds",
+        "runtimeVersion": {
+            "policy": "appVersion"
+        },
+        "updates": {
+            "url": "https://u.expo.dev/5c11c11b-a247-48b5-b525-cc08cdf87535"
         }
-      ]
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "5c11c11b-a247-48b5-b525-cc08cdf87535"
-      }
-    },
-    "owner": "uniglo-diamonds",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/5c11c11b-a247-48b5-b525-cc08cdf87535"
     }
-  }
 }
