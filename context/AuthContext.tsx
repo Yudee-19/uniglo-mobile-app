@@ -1,5 +1,5 @@
-import { User, getCurrentUser, logoutUser } from "@/services/authServices";
 import { resetSessionExpiredFlag } from "@/services/api";
+import { User, getCurrentUser, logoutUser } from "@/services/authServices";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosError } from "axios";
 import {
