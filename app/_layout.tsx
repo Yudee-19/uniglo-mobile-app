@@ -42,7 +42,7 @@ function RootLayoutContent() {
     });
 
     useEffect(() => {
-        if (fontsLoaded || (fontError && !authLoading)) {
+        if ((fontsLoaded || fontError) && !authLoading) {
             SplashScreen.hideAsync();
         }
     }, [fontsLoaded, fontError, authLoading]);
