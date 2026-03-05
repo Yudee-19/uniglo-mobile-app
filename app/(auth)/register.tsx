@@ -10,6 +10,7 @@ import {
     ActivityIndicator,
     Alert,
     Image,
+    KeyboardAvoidingView,
     Platform,
     Pressable,
     ScrollView,
@@ -18,10 +19,10 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import {
-    KeyboardAvoidingView,
-    KeyboardProvider,
-} from "react-native-keyboard-controller";
+// import {
+//     KeyboardAvoidingView,
+//     KeyboardProvider,
+// } from "react-native-keyboard-controller";
 
 // ─── Constants ────────────────────────────────────────────────────
 const BUSINESS_TYPES = [
@@ -435,336 +436,334 @@ export default function RegisterScreen() {
     const stepTitles = ["Personal Info", "Company & Address", "Set Password"];
 
     return (
-        <KeyboardProvider>
-            <LinearGradient
-                colors={["#2e1035", "#050208"]}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
+        // <KeyboardProvider>
+        <LinearGradient
+            colors={["#2e1035", "#050208"]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            className="flex-1"
+        >
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
                 className="flex-1"
             >
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-                    className="flex-1"
+                <ScrollView
+                    contentContainerClassName="flex-grow justify-center px-6 py-12"
+                    keyboardShouldPersistTaps="handled"
                 >
-                    <ScrollView
-                        contentContainerClassName="flex-grow justify-center px-6 py-12"
-                        keyboardShouldPersistTaps="handled"
-                    >
-                        {/* Logo */}
-                        <View className="items-center mb-8">
-                            <Image
-                                source={require("../../assets/images/logo.png")}
-                                className="w-20 h-20 mb-2"
-                                resizeMode="contain"
+                    {/* Logo */}
+                    <View className="items-center mb-8">
+                        <Image
+                            source={require("../../assets/images/logo.png")}
+                            className="w-20 h-20 mb-2"
+                            resizeMode="contain"
+                        />
+                        <Text className="text-primary-yellow-2 text-xl font-bold tracking-widest">
+                            UNIGLO DIAMONDS
+                        </Text>
+                    </View>
+
+                    {/* Title */}
+                    <Text className="text-white text-3xl font-bold mb-2">
+                        Create Account
+                    </Text>
+                    <Text className="text-gray-400 text-sm mb-6">
+                        {stepTitles[step - 1]}
+                    </Text>
+
+                    {/* Step Indicator */}
+                    <StepIndicator currentStep={step} />
+
+                    {/* ── Step 1: Personal Info ── */}
+                    {step === 1 && (
+                        <View>
+                            <FloatingInput
+                                label="Username"
+                                value={formData.username}
+                                onChangeText={(v) => update("username", v)}
+                                editable={!isLoading}
                             />
-                            <Text className="text-primary-yellow-2 text-xl font-bold tracking-widest">
-                                UNIGLO DIAMONDS
-                            </Text>
-                        </View>
-
-                        {/* Title */}
-                        <Text className="text-white text-3xl font-bold mb-2">
-                            Create Account
-                        </Text>
-                        <Text className="text-gray-400 text-sm mb-6">
-                            {stepTitles[step - 1]}
-                        </Text>
-
-                        {/* Step Indicator */}
-                        <StepIndicator currentStep={step} />
-
-                        {/* ── Step 1: Personal Info ── */}
-                        {step === 1 && (
-                            <View>
-                                <FloatingInput
-                                    label="Username"
-                                    value={formData.username}
-                                    onChangeText={(v) => update("username", v)}
-                                    editable={!isLoading}
-                                />
-                                <View className="flex-row gap-3">
-                                    <View className="flex-1">
-                                        <FloatingInput
-                                            label="First Name"
-                                            value={formData.firstName}
-                                            onChangeText={(v) =>
-                                                update("firstName", v)
-                                            }
-                                            autoCapitalize="words"
-                                            editable={!isLoading}
-                                        />
-                                    </View>
-                                    <View className="flex-1">
-                                        <FloatingInput
-                                            label="Last Name"
-                                            value={formData.lastName}
-                                            onChangeText={(v) =>
-                                                update("lastName", v)
-                                            }
-                                            autoCapitalize="words"
-                                            editable={!isLoading}
-                                        />
-                                    </View>
+                            <View className="flex-row gap-3">
+                                <View className="flex-1">
+                                    <FloatingInput
+                                        label="First Name"
+                                        value={formData.firstName}
+                                        onChangeText={(v) =>
+                                            update("firstName", v)
+                                        }
+                                        autoCapitalize="words"
+                                        editable={!isLoading}
+                                    />
                                 </View>
-                                <FloatingInput
-                                    label="Email"
-                                    value={formData.email}
-                                    onChangeText={(v) => update("email", v)}
-                                    keyboardType="email-address"
-                                    autoComplete="email"
-                                    editable={!isLoading}
-                                    rightIcon={
-                                        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-                                            formData.email,
-                                        ) ? (
-                                            <Ionicons
-                                                name="checkmark"
-                                                size={20}
-                                                color="#9ca3af"
-                                            />
-                                        ) : null
-                                    }
-                                />
-                                <SelectField
-                                    label="Country Code"
-                                    value={formData.countryCode}
-                                    options={countries.map((c) => ({
-                                        value: c.isoCode || "",
-                                        label: `${c.label} (${c.isoCode})`,
-                                    }))}
-                                    onSelect={(v) => update("countryCode", v)}
-                                    disabled={isLoading || isLoadingLocations}
-                                />
-                                <FloatingInput
-                                    label="Phone Number"
-                                    value={formData.phone}
-                                    onChangeText={(v) => update("phone", v)}
-                                    keyboardType="phone-pad"
-                                    editable={!isLoading}
-                                />
+                                <View className="flex-1">
+                                    <FloatingInput
+                                        label="Last Name"
+                                        value={formData.lastName}
+                                        onChangeText={(v) =>
+                                            update("lastName", v)
+                                        }
+                                        autoCapitalize="words"
+                                        editable={!isLoading}
+                                    />
+                                </View>
                             </View>
-                        )}
+                            <FloatingInput
+                                label="Email"
+                                value={formData.email}
+                                onChangeText={(v) => update("email", v)}
+                                keyboardType="email-address"
+                                autoComplete="email"
+                                editable={!isLoading}
+                                rightIcon={
+                                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                                        formData.email,
+                                    ) ? (
+                                        <Ionicons
+                                            name="checkmark"
+                                            size={20}
+                                            color="#9ca3af"
+                                        />
+                                    ) : null
+                                }
+                            />
+                            <SelectField
+                                label="Country Code"
+                                value={formData.countryCode}
+                                options={countries.map((c) => ({
+                                    value: c.isoCode || "",
+                                    label: `${c.label} (${c.isoCode})`,
+                                }))}
+                                onSelect={(v) => update("countryCode", v)}
+                                disabled={isLoading || isLoadingLocations}
+                            />
+                            <FloatingInput
+                                label="Phone Number"
+                                value={formData.phone}
+                                onChangeText={(v) => update("phone", v)}
+                                keyboardType="phone-pad"
+                                editable={!isLoading}
+                            />
+                        </View>
+                    )}
 
-                        {/* ── Step 2: Company & Address ── */}
-                        {step === 2 && (
-                            <View>
-                                <FloatingInput
-                                    label="Company Name"
-                                    value={formData.companyName}
-                                    onChangeText={(v) =>
-                                        update("companyName", v)
-                                    }
-                                    autoCapitalize="words"
-                                    editable={!isLoading}
-                                />
-                                <SelectField
-                                    label="Business Type"
-                                    value={formData.businessType}
-                                    options={BUSINESS_TYPES}
-                                    onSelect={(v) => update("businessType", v)}
-                                    disabled={isLoading || isLoadingLocations}
-                                />
-                                <SelectField
-                                    label="Country"
-                                    value={formData.country}
-                                    options={countries}
-                                    onSelect={(v) => update("country", v)}
-                                    disabled={isLoading || isLoadingLocations}
-                                />
-                                <SelectField
-                                    label="State"
-                                    value={formData.state}
-                                    options={states}
-                                    onSelect={(v) => update("state", v)}
-                                    disabled={
-                                        isLoading ||
-                                        isLoadingLocations ||
-                                        !formData.country
-                                    }
-                                />
-                                <SelectField
-                                    label="City (optional)"
-                                    value={formData.city}
-                                    options={cities}
-                                    onSelect={(v) => update("city", v)}
-                                    disabled={
-                                        isLoading ||
-                                        isLoadingLocations ||
-                                        !formData.state
-                                    }
-                                />
-                                <FloatingInput
-                                    label="Street"
-                                    value={formData.street}
-                                    onChangeText={(v) => update("street", v)}
-                                    editable={!isLoading}
-                                />
-                                <FloatingInput
-                                    label="Zip Code"
-                                    value={formData.zipCode}
-                                    onChangeText={(v) => update("zipCode", v)}
-                                    keyboardType="numeric"
-                                    editable={!isLoading}
-                                />
-                            </View>
-                        )}
+                    {/* ── Step 2: Company & Address ── */}
+                    {step === 2 && (
+                        <View>
+                            <FloatingInput
+                                label="Company Name"
+                                value={formData.companyName}
+                                onChangeText={(v) => update("companyName", v)}
+                                autoCapitalize="words"
+                                editable={!isLoading}
+                            />
+                            <SelectField
+                                label="Business Type"
+                                value={formData.businessType}
+                                options={BUSINESS_TYPES}
+                                onSelect={(v) => update("businessType", v)}
+                                disabled={isLoading || isLoadingLocations}
+                            />
+                            <SelectField
+                                label="Country"
+                                value={formData.country}
+                                options={countries}
+                                onSelect={(v) => update("country", v)}
+                                disabled={isLoading || isLoadingLocations}
+                            />
+                            <SelectField
+                                label="State"
+                                value={formData.state}
+                                options={states}
+                                onSelect={(v) => update("state", v)}
+                                disabled={
+                                    isLoading ||
+                                    isLoadingLocations ||
+                                    !formData.country
+                                }
+                            />
+                            <SelectField
+                                label="City (optional)"
+                                value={formData.city}
+                                options={cities}
+                                onSelect={(v) => update("city", v)}
+                                disabled={
+                                    isLoading ||
+                                    isLoadingLocations ||
+                                    !formData.state
+                                }
+                            />
+                            <FloatingInput
+                                label="Street"
+                                value={formData.street}
+                                onChangeText={(v) => update("street", v)}
+                                editable={!isLoading}
+                            />
+                            <FloatingInput
+                                label="Zip Code"
+                                value={formData.zipCode}
+                                onChangeText={(v) => update("zipCode", v)}
+                                keyboardType="numeric"
+                                editable={!isLoading}
+                            />
+                        </View>
+                    )}
 
-                        {/* ── Step 3: Password ── */}
-                        {step === 3 && (
-                            <View>
-                                <FloatingInput
-                                    label="Password"
-                                    value={formData.password}
-                                    onChangeText={(v) => update("password", v)}
-                                    secureTextEntry={!showPassword}
-                                    autoComplete="password-new"
-                                    editable={!isLoading}
-                                    rightIcon={
-                                        <Pressable
-                                            onPress={() =>
-                                                setShowPassword(!showPassword)
-                                            }
-                                            disabled={isLoading}
-                                        >
-                                            <Ionicons
-                                                name={
-                                                    showPassword
-                                                        ? "eye-outline"
-                                                        : "eye-off-outline"
-                                                }
-                                                size={22}
-                                                color="#9ca3af"
-                                            />
-                                        </Pressable>
-                                    }
-                                />
-                                <FloatingInput
-                                    label="Confirm Password"
-                                    value={formData.confirmPassword}
-                                    onChangeText={(v) =>
-                                        update("confirmPassword", v)
-                                    }
-                                    secureTextEntry={!showConfirmPassword}
-                                    autoComplete="password-new"
-                                    editable={!isLoading}
-                                    rightIcon={
-                                        <Pressable
-                                            onPress={() =>
-                                                setShowConfirmPassword(
-                                                    !showConfirmPassword,
-                                                )
-                                            }
-                                            disabled={isLoading}
-                                        >
-                                            <Ionicons
-                                                name={
-                                                    showConfirmPassword
-                                                        ? "eye-outline"
-                                                        : "eye-off-outline"
-                                                }
-                                                size={22}
-                                                color="#9ca3af"
-                                            />
-                                        </Pressable>
-                                    }
-                                />
-                                {/* Password match indicator */}
-                                {formData.confirmPassword.length > 0 && (
-                                    <View className="flex-row items-center mb-4 gap-1">
+                    {/* ── Step 3: Password ── */}
+                    {step === 3 && (
+                        <View>
+                            <FloatingInput
+                                label="Password"
+                                value={formData.password}
+                                onChangeText={(v) => update("password", v)}
+                                secureTextEntry={!showPassword}
+                                autoComplete="password-new"
+                                editable={!isLoading}
+                                rightIcon={
+                                    <Pressable
+                                        onPress={() =>
+                                            setShowPassword(!showPassword)
+                                        }
+                                        disabled={isLoading}
+                                    >
                                         <Ionicons
                                             name={
-                                                formData.password ===
-                                                formData.confirmPassword
-                                                    ? "checkmark-circle"
-                                                    : "close-circle"
+                                                showPassword
+                                                    ? "eye-outline"
+                                                    : "eye-off-outline"
                                             }
-                                            size={16}
-                                            color={
-                                                formData.password ===
-                                                formData.confirmPassword
-                                                    ? "#22c55e"
-                                                    : "#ef4444"
-                                            }
+                                            size={22}
+                                            color="#9ca3af"
                                         />
-                                        <Text
-                                            className={`text-xs ${
-                                                formData.password ===
-                                                formData.confirmPassword
-                                                    ? "text-green-500"
-                                                    : "text-red-500"
-                                            }`}
-                                        >
-                                            {formData.password ===
+                                    </Pressable>
+                                }
+                            />
+                            <FloatingInput
+                                label="Confirm Password"
+                                value={formData.confirmPassword}
+                                onChangeText={(v) =>
+                                    update("confirmPassword", v)
+                                }
+                                secureTextEntry={!showConfirmPassword}
+                                autoComplete="password-new"
+                                editable={!isLoading}
+                                rightIcon={
+                                    <Pressable
+                                        onPress={() =>
+                                            setShowConfirmPassword(
+                                                !showConfirmPassword,
+                                            )
+                                        }
+                                        disabled={isLoading}
+                                    >
+                                        <Ionicons
+                                            name={
+                                                showConfirmPassword
+                                                    ? "eye-outline"
+                                                    : "eye-off-outline"
+                                            }
+                                            size={22}
+                                            color="#9ca3af"
+                                        />
+                                    </Pressable>
+                                }
+                            />
+                            {/* Password match indicator */}
+                            {formData.confirmPassword.length > 0 && (
+                                <View className="flex-row items-center mb-4 gap-1">
+                                    <Ionicons
+                                        name={
+                                            formData.password ===
                                             formData.confirmPassword
-                                                ? "Passwords match"
-                                                : "Passwords do not match"}
-                                        </Text>
-                                    </View>
-                                )}
-                            </View>
+                                                ? "checkmark-circle"
+                                                : "close-circle"
+                                        }
+                                        size={16}
+                                        color={
+                                            formData.password ===
+                                            formData.confirmPassword
+                                                ? "#22c55e"
+                                                : "#ef4444"
+                                        }
+                                    />
+                                    <Text
+                                        className={`text-xs ${
+                                            formData.password ===
+                                            formData.confirmPassword
+                                                ? "text-green-500"
+                                                : "text-red-500"
+                                        }`}
+                                    >
+                                        {formData.password ===
+                                        formData.confirmPassword
+                                            ? "Passwords match"
+                                            : "Passwords do not match"}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    )}
+
+                    {/* ── Navigation Buttons ── */}
+                    <View className="flex-col gap-3 mt-2">
+                        {step > 1 && (
+                            <TouchableOpacity
+                                onPress={handleBack}
+                                disabled={isLoading}
+                                className="flex-1 border border-white/40 rounded-full py-4 items-center"
+                            >
+                                <Text className="text-white text-base font-bold tracking-widest">
+                                    BACK
+                                </Text>
+                            </TouchableOpacity>
                         )}
 
-                        {/* ── Navigation Buttons ── */}
-                        <View className="flex-col gap-3 mt-2">
-                            {step > 1 && (
-                                <TouchableOpacity
-                                    onPress={handleBack}
-                                    disabled={isLoading}
-                                    className="flex-1 border border-white/40 rounded-full py-4 items-center"
-                                >
-                                    <Text className="text-white text-base font-bold tracking-widest">
-                                        BACK
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-
-                            {step < 3 ? (
-                                <TouchableOpacity
-                                    onPress={handleNext}
-                                    activeOpacity={0.85}
-                                    className={`bg-white rounded-full py-4 items-center ${step > 1 ? "flex-1" : "w-full"}`}
-                                >
+                        {step < 3 ? (
+                            <TouchableOpacity
+                                onPress={handleNext}
+                                activeOpacity={0.85}
+                                className={`bg-white rounded-full py-4 items-center ${step > 1 ? "flex-1" : "w-full"}`}
+                            >
+                                <Text className="text-[#2e1035] text-base font-bold tracking-widest">
+                                    NEXT
+                                </Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity
+                                onPress={handleRegister}
+                                activeOpacity={0.85}
+                                disabled={isLoading}
+                                className={`bg-white rounded-full py-4 items-center flex-1 ${
+                                    isLoading ? "opacity-50" : ""
+                                }`}
+                            >
+                                {isLoading ? (
+                                    <ActivityIndicator color="#2e1035" />
+                                ) : (
                                     <Text className="text-[#2e1035] text-base font-bold tracking-widest">
-                                        NEXT
+                                        SIGN UP
                                     </Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <TouchableOpacity
-                                    onPress={handleRegister}
-                                    activeOpacity={0.85}
-                                    disabled={isLoading}
-                                    className={`bg-white rounded-full py-4 items-center flex-1 ${
-                                        isLoading ? "opacity-50" : ""
-                                    }`}
-                                >
-                                    {isLoading ? (
-                                        <ActivityIndicator color="#2e1035" />
-                                    ) : (
-                                        <Text className="text-[#2e1035] text-base font-bold tracking-widest">
-                                            SIGN UP
-                                        </Text>
-                                    )}
-                                </TouchableOpacity>
-                            )}
-                        </View>
+                                )}
+                            </TouchableOpacity>
+                        )}
+                    </View>
 
-                        {/* Sign In link */}
-                        <View className="flex-row items-center justify-center mt-6">
-                            <Text className="text-gray-400 text-sm">
-                                Already have an account?{" "}
-                            </Text>
-                            <Link href="/login" asChild>
-                                <Pressable disabled={isLoading}>
-                                    <Text className="text-white text-sm font-semibold underline">
-                                        Sign in
-                                    </Text>
-                                </Pressable>
-                            </Link>
-                        </View>
-                    </ScrollView>
-                </KeyboardAvoidingView>
-            </LinearGradient>
-        </KeyboardProvider>
+                    {/* Sign In link */}
+                    <View className="flex-row items-center justify-center mt-6">
+                        <Text className="text-gray-400 text-sm">
+                            Already have an account?{" "}
+                        </Text>
+                        <Link href="/login" asChild>
+                            <Pressable disabled={isLoading}>
+                                <Text className="text-white text-sm font-semibold underline">
+                                    Sign in
+                                </Text>
+                            </Pressable>
+                        </Link>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </LinearGradient>
+        // </KeyboardProvider>
     );
 }

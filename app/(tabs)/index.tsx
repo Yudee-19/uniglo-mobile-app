@@ -13,13 +13,12 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
     const router = useRouter();
 
     return (
-        <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+        <View className="flex-1 bg-white">
             {/* ─── Header ─── */}
 
             <ScrollView
@@ -200,6 +199,6 @@ export default function HomeScreen() {
                 {/* ─── Footer ─── */}
                 <AppFooter />
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }

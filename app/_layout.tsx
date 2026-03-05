@@ -42,6 +42,11 @@ function RootLayoutContent() {
     });
 
     useEffect(() => {
+        console.log("[RootLayout] Font status:", {
+            fontsLoaded,
+            fontError: fontError?.message,
+            authLoading,
+        });
         if ((fontsLoaded || fontError) && !authLoading) {
             SplashScreen.hideAsync();
         }
