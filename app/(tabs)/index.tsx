@@ -5,14 +5,7 @@ import { SHAPE_IMAGES, SHAPES } from "@/types/diamond.types";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import {
-    Image,
-    Linking,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function HomeScreen() {
     const router = useRouter();
@@ -164,36 +157,6 @@ export default function HomeScreen() {
                         Certified Diamond Assurance
                     </Text>
                     <CertifiedDiamondMarquee />
-                </View>
-
-                {/* ─── Uniglow Experience ─── */}
-                <View className="bg-white px-4 py-8">
-                    {/* Experience Item 2 */}
-                    <TouchableOpacity
-                        className="mb-8"
-                        onPress={() => {
-                            Linking.openURL(
-                                `https://www.uniglodiamonds.com/contact-us`,
-                            );
-                        }}
-                    >
-                        <View className="w-full h-56 bg-gray-200 rounded-xl mb-4 overflow-hidden">
-                            <Image
-                                source={require("../../assets/images/appointment.jpg")}
-                                className="w-full h-full"
-                            />
-                        </View>
-                        <View className="flex-row justify-between items-center px-1">
-                            <Text className="text-xl font-serif text-[#2e1035]">
-                                Book an Appointment
-                            </Text>
-                            <Feather
-                                name="arrow-right"
-                                size={24}
-                                color="#2e1035"
-                            />
-                        </View>
-                    </TouchableOpacity>
                 </View>
 
                 {/* ─── Footer ─── */}

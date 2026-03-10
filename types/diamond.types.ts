@@ -85,6 +85,7 @@ export interface FilterState {
     searchTerm?: string;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
+    search?: string;
 }
 export type DiamondAvailability = "A" | "M" | "H" | "S"; // Available, Memo, Hold, Sold
 export type DiamondLab = "GIA" | "IGI" | "HRD" | "OTHERS";

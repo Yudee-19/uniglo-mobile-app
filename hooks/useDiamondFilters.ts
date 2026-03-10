@@ -30,6 +30,7 @@ const initialFilterState: FilterState = {
     searchTerm: undefined,
     sortBy: "createdAt",
     sortOrder: "desc",
+    search: undefined,
 };
 
 export const useDiamondFilters = () => {
@@ -61,7 +62,8 @@ export const useDiamondFilters = () => {
             filters.colorType !== undefined ||
             filters.searchTerm !== undefined ||
             filters.sortBy !== "createdAt" ||
-            filters.sortOrder !== "desc"
+            filters.sortOrder !== "desc" ||
+            filters.search !== undefined
         );
     }, [filters]);
 

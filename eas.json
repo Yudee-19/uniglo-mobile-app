@@ -32,7 +32,6 @@
     },
     "submit": {
         "production": {
-            "autoIncrement": true,
             "ios": {
                 "appleId": "kevalai24@gmail.com",
                 "ascAppId": "6760025753",

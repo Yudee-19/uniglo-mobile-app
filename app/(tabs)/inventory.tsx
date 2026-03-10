@@ -16,6 +16,7 @@ import {
     RefreshControl,
     ScrollView,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -59,6 +60,16 @@ export default function InventoryScreen() {
     const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
     // Add a ref for the ScrollView
     const scrollViewRef = useRef<ScrollView>(null);
+    const [searchInput, setSearchInput] = useState(filters.search || "");
+    const searchTimeoutRef = useRef<number | null>(null);
+
+    // Add this useEffect to sync searchInput with filters.searchTerm
+    useEffect(() => {
+        // When filters.searchTerm becomes undefined (reset), clear the input
+        if (filters.searchTerm === undefined) {
+            setSearchInput("");
+        }
+    }, [filters.searchTerm]);
 
     // Calculate total pages (based on the limit: 25 in your useDiamondFilters)
     const totalPages = Math.max(1, Math.ceil(totalCount / 25));
@@ -71,6 +82,29 @@ export default function InventoryScreen() {
             scrollViewRef.current?.scrollTo({ y: 0, animated: true });
         }
     };
+    // Debounced search handler
+    const handleSearchChange = (text: string) => {
+        setSearchInput(text);
+
+        // Clear existing timeout
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        // Set new timeout for debounced search
+        searchTimeoutRef.current = setTimeout(() => {
+            updateFilter("searchTerm", text);
+        }, 500) as unknown as number; // 500ms delay
+    };
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         // Optional: Reset filters first so we don't mix old filters with the new click
@@ -152,6 +186,7 @@ export default function InventoryScreen() {
         setRefreshing(true);
         resetFilters();
         setSelectedSort("recent");
+        setSearchInput(""); // Add this line to clear search input
         // Close filter panel if open
         if (showFilters) {
             Animated.timing(filterAnimation, {
@@ -576,83 +611,125 @@ export default function InventoryScreen() {
                         </TouchableOpacity>
                     </View>
                 </View>
-                {/* <TextInput
-                    placeholder="This is a test input to check keyboard behavior"
-                    className="h-10 bg-white mx-4 mb-4 px-3 rounded-md border border-gray-300"
-                    value={filters.searchTerm ?? ""}
-                    onChangeText={(text) => updateFilter("searchTerm", text)}
-                ></TextInput> */}
+                <TextInput
+                    placeholder="Search with Stock id..."
+                    className="h-15 bg-white mx-4 mb-4 px-3 rounded-md border border-gray-300"
+                    value={searchInput}
+                    onChangeText={handleSearchChange}
+                />
 
                 {/* Diamond List */}
                 <View className="px-4 py-2">
-                    <FlatList
-                        data={loading ? Array.from({ length: 5 }) : diamonds}
-                        keyExtractor={(item, index) =>
-                            loading ? String(index) : (item as any)._id
-                        }
-                        renderItem={({ item }) =>
-                            loading ? (
-                                <DiamondCardSkeleton />
-                            ) : (
-                                <DiamondCard diamond={item as any} />
-                            )
-                        }
-                        contentContainerStyle={{
-                            paddingHorizontal: 0,
-                            paddingVertical: 0,
-                        }}
-                        nestedScrollEnabled
-                        scrollEnabled={false}
-                    />
-                    {/* Pagination Controls */}
-                    {!loading && totalCount > 0 && (
-                        <View className="flex-row justify-between items-center mt-6 mb-4">
-                            <TouchableOpacity
-                                onPress={() => handlePageChange(page - 1)}
-                                disabled={page === 1}
-                                className={`px-4 py-2 rounded-md ${
-                                    page === 1
-                                        ? "bg-gray-200"
-                                        : "bg-primary-purple border border-[#49214c]"
-                                }`}
-                                style={
-                                    page !== 1
-                                        ? { backgroundColor: "#49214c" }
-                                        : {}
-                                }
-                            >
-                                <Text
-                                    className={`font-medium ${page === 1 ? "text-gray-400" : "text-white"}`}
-                                >
-                                    Previous
-                                </Text>
-                            </TouchableOpacity>
-
-                            <Text className="text-gray-600 font-medium">
-                                Page {page} of {totalPages}
+                    {!loading && diamonds.length === 0 ? (
+                        // No Diamonds Found UI
+                        <View className="items-center justify-center py-16 px-6">
+                            <View className="w-24 h-24 bg-gray-100 rounded-full items-center justify-center mb-4">
+                                <Ionicons
+                                    name="diamond-outline"
+                                    size={48}
+                                    color="#9CA3AF"
+                                />
+                            </View>
+                            <Text className="text-xl font-semibold text-gray-900 mb-2">
+                                No Diamonds Found
                             </Text>
-
-                            <TouchableOpacity
-                                onPress={() => handlePageChange(page + 1)}
-                                disabled={page >= totalPages}
-                                className={`px-4 py-2 rounded-md ${
-                                    page >= totalPages
-                                        ? "bg-gray-200"
-                                        : "bg-primary-purple border border-[#49214c]"
-                                }`}
-                                style={
-                                    page < totalPages
-                                        ? { backgroundColor: "#49214c" }
-                                        : {}
-                                }
-                            >
-                                <Text
-                                    className={`font-medium ${page >= totalPages ? "text-gray-400" : "text-white"}`}
+                            <Text className="text-center text-gray-500 mb-6">
+                                {filters.searchTerm
+                                    ? `No results found for "${filters.searchTerm}"`
+                                    : "Try adjusting your filters to see more results"}
+                            </Text>
+                            {hasActiveFilters && (
+                                <TouchableOpacity
+                                    onPress={resetFilters}
+                                    className="px-6 py-3 rounded-md border-2 border-primary-purple"
+                                    style={{ backgroundColor: "#49214c" }}
                                 >
-                                    Next
-                                </Text>
-                            </TouchableOpacity>
+                                    <Text className="text-white font-semibold">
+                                        Clear All Filters
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
+                    ) : (
+                        <>
+                            <FlatList
+                                data={
+                                    loading
+                                        ? Array.from({ length: 5 })
+                                        : diamonds
+                                }
+                                keyExtractor={(item, index) =>
+                                    loading ? String(index) : (item as any)._id
+                                }
+                                renderItem={({ item }) =>
+                                    loading ? (
+                                        <DiamondCardSkeleton />
+                                    ) : (
+                                        <DiamondCard diamond={item as any} />
+                                    )
+                                }
+                                contentContainerStyle={{
+                                    paddingHorizontal: 0,
+                                    paddingVertical: 0,
+                                }}
+                                nestedScrollEnabled
+                                scrollEnabled={false}
+                            />
+                            {/* Pagination Controls */}
+                            {!loading && totalCount > 0 && (
+                                <View className="flex-row justify-between items-center mt-6 mb-4">
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            handlePageChange(page - 1)
+                                        }
+                                        disabled={page === 1}
+                                        className={`px-4 py-2 rounded-md ${
+                                            page === 1
+                                                ? "bg-gray-200"
+                                                : "bg-primary-purple border border-[#49214c]"
+                                        }`}
+                                        style={
+                                            page !== 1
+                                                ? { backgroundColor: "#49214c" }
+                                                : {}
+                                        }
+                                    >
+                                        <Text
+                                            className={`font-medium ${page === 1 ? "text-gray-400" : "text-white"}`}
+                                        >
+                                            Previous
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    <Text className="text-gray-600 font-medium">
+                                        Page {page} of {totalPages}
+                                    </Text>
+
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            handlePageChange(page + 1)
+                                        }
+                                        disabled={page >= totalPages}
+                                        className={`px-4 py-2 rounded-md ${
+                                            page >= totalPages
+                                                ? "bg-gray-200"
+                                                : "bg-primary-purple border border-[#49214c]"
+                                        }`}
+                                        style={
+                                            page < totalPages
+                                                ? { backgroundColor: "#49214c" }
+                                                : {}
+                                        }
+                                    >
+                                        <Text
+                                            className={`font-medium ${page >= totalPages ? "text-gray-400" : "text-white"}`}
+                                        >
+                                            Next
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </>
                     )}
                 </View>
             </ScrollView>
