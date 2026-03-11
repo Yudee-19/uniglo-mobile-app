@@ -9,7 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
-import { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -100,71 +100,132 @@ const FloatingInput = ({
     );
 };
 
-// ─── Select Picker ────────────────────────────────────────────────
+// ─── Select Picker (Optimized with FlatList + Search) ─────────────
 interface SelectFieldProps {
     label: string;
     value: string;
     options: { value: string; label: string }[];
     onSelect: (value: string) => void;
     disabled?: boolean;
+    loading?: boolean;
 }
 
-const SelectField = ({
-    label,
-    value,
-    options,
-    onSelect,
-    disabled = false,
-}: SelectFieldProps) => {
-    const [open, setOpen] = useState(false);
-    const selected = options.find((o) => o.value === value);
+const SelectField = React.memo(
+    ({
+        label,
+        value,
+        options,
+        onSelect,
+        disabled = false,
+        loading = false,
+    }: SelectFieldProps) => {
+        const [open, setOpen] = useState(false);
+        const [search, setSearch] = useState("");
 
-    return (
-        <View className="mb-4">
-            <TouchableOpacity
-                onPress={() => !disabled && setOpen(!open)}
-                activeOpacity={0.8}
-                className={`border border-gray-500 rounded-xl px-4 py-4 flex-row items-center justify-between ${
-                    disabled ? "opacity-50" : ""
-                }`}
-            >
-                <Text
-                    className={`text-base ${selected ? "text-white" : "text-gray-400"}`}
+        const selected = useMemo(
+            () => options.find((o) => o.value === value),
+            [options, value],
+        );
+
+        const filteredOptions = useMemo(() => {
+            if (!search) return options;
+            const query = search.toLowerCase();
+            return options.filter((o) => o.label.toLowerCase().includes(query));
+        }, [options, search]);
+
+        const handleToggle = useCallback(() => {
+            if (!disabled) {
+                setOpen((prev) => {
+                    if (prev) setSearch("");
+                    return !prev;
+                });
+            }
+        }, [disabled]);
+
+        const handleSelect = useCallback(
+            (val: string) => {
+                onSelect(val);
+                setOpen(false);
+                setSearch("");
+            },
+            [onSelect],
+        );
+
+        return (
+            <View className="mb-4">
+                <TouchableOpacity
+                    onPress={handleToggle}
+                    activeOpacity={0.8}
+                    className={`border border-gray-500 rounded-xl px-4 py-4 flex-row items-center justify-between ${
+                        disabled ? "opacity-50" : ""
+                    }`}
                 >
-                    {selected ? selected.label : label}
-                </Text>
-                <Ionicons
-                    name={open ? "chevron-up" : "chevron-down"}
-                    size={18}
-                    color="#9ca3af"
-                />
-            </TouchableOpacity>
+                    <Text
+                        className={`text-base ${
+                            selected ? "text-white" : "text-gray-400"
+                        }`}
+                    >
+                        {selected ? selected.label : label}
+                    </Text>
+                    {loading ? (
+                        <ActivityIndicator size="small" color="#9ca3af" />
+                    ) : (
+                        <Ionicons
+                            name={open ? "chevron-up" : "chevron-down"}
+                            size={18}
+                            color="#9ca3af"
+                        />
+                    )}
+                </TouchableOpacity>
 
-            {open && (
-                <View className="border border-gray-500 rounded-xl mt-1 max-h-44 overflow-hidden bg-[#1a0a22]">
-                    <ScrollView nestedScrollEnabled>
-                        {options.map((opt) => (
-                            <TouchableOpacity
-                                key={opt.value}
-                                onPress={() => {
-                                    onSelect(opt.value);
-                                    setOpen(false);
-                                }}
-                                className={`px-4 py-3 border-b border-gray-700 ${
-                                    opt.value === value ? "bg-white/10" : ""
-                                }`}
-                            >
-                                <Text className="text-white text-sm">
-                                    {opt.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
-            )}
-        </View>
-    );
-};
+                {open && (
+                    <View className="border border-gray-500 rounded-xl mt-1 max-h-56 overflow-hidden bg-[#1a0a22]">
+                        {options.length > 10 && (
+                            <View className="px-3 pt-2 pb-1">
+                                <TextInput
+                                    value={search}
+                                    onChangeText={setSearch}
+                                    placeholder="Search..."
+                                    placeholderTextColor="#6b7280"
+                                    className="text-white text-sm bg-white/10 rounded-lg px-3 py-2"
+                                    autoFocus
+                                />
+                            </View>
+                        )}
+                        <ScrollView
+                            nestedScrollEnabled
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            {filteredOptions.length === 0 ? (
+                                <View className="px-4 py-3">
+                                    <Text className="text-gray-400 text-sm">
+                                        No results found
+                                    </Text>
+                                </View>
+                            ) : (
+                                filteredOptions.map((opt) => (
+                                    <TouchableOpacity
+                                        key={opt.value}
+                                        onPress={() => handleSelect(opt.value)}
+                                        className={`px-4 py-3 border-b border-gray-700 ${
+                                            opt.value === value
+                                                ? "bg-white/10"
+                                                : ""
+                                        }`}
+                                    >
+                                        <Text className="text-white text-sm">
+                                            {opt.label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))
+                            )}
+                        </ScrollView>
+                    </View>
+                )}
+            </View>
+        );
+    },
+);
 
 // ─── Step Indicator ───────────────────────────────────────────────
 const StepIndicator = ({ currentStep }: { currentStep: number }) => (
@@ -244,6 +305,9 @@ export default function RegisterScreen() {
         countries,
         states,
         cities,
+        isLoadingCountries,
+        isLoadingStates,
+        isLoadingCities,
         isLoading: isLoadingLocations,
     } = useLocationData(formData.country, formData.state);
 
@@ -540,7 +604,8 @@ export default function RegisterScreen() {
                                     label: `${c.label} (${c.isoCode})`,
                                 }))}
                                 onSelect={(v) => update("countryCode", v)}
-                                disabled={isLoading || isLoadingLocations}
+                                disabled={isLoading || isLoadingCountries}
+                                loading={isLoadingCountries}
                             />
                             <FloatingInput
                                 label="Phone Number"
@@ -567,14 +632,15 @@ export default function RegisterScreen() {
                                 value={formData.businessType}
                                 options={BUSINESS_TYPES}
                                 onSelect={(v) => update("businessType", v)}
-                                disabled={isLoading || isLoadingLocations}
+                                disabled={isLoading}
                             />
                             <SelectField
                                 label="Country"
                                 value={formData.country}
                                 options={countries}
                                 onSelect={(v) => update("country", v)}
-                                disabled={isLoading || isLoadingLocations}
+                                disabled={isLoading || isLoadingCountries}
+                                loading={isLoadingCountries}
                             />
                             <SelectField
                                 label="State"
@@ -583,9 +649,10 @@ export default function RegisterScreen() {
                                 onSelect={(v) => update("state", v)}
                                 disabled={
                                     isLoading ||
-                                    isLoadingLocations ||
+                                    isLoadingStates ||
                                     !formData.country
                                 }
+                                loading={isLoadingStates}
                             />
                             <SelectField
                                 label="City (optional)"
@@ -594,9 +661,10 @@ export default function RegisterScreen() {
                                 onSelect={(v) => update("city", v)}
                                 disabled={
                                     isLoading ||
-                                    isLoadingLocations ||
+                                    isLoadingCities ||
                                     !formData.state
                                 }
+                                loading={isLoadingCities}
                             />
                             <FloatingInput
                                 label="Street"

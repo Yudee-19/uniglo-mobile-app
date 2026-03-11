@@ -1,10 +1,55 @@
-import { useEffect, useMemo, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 // Define the shape of our dropdown options
 export interface LocationOption {
     value: string;
     label: string;
     isoCode?: string; // Optional because cities don't need it
+}
+
+// ─── Module-level constants (created once, not per render) ────────
+const CACHE_KEY_COUNTRIES = "location_countries_cache";
+const CACHE_KEY_STATES_PREFIX = "location_states_";
+const COUNTRIES_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const STATES_TTL = 12 * 60 * 60 * 1000; // 12 hours
+
+const headers = new Headers();
+headers.append(
+    "X-CSCAPI-KEY",
+    process.env.EXPO_PUBLIC_CSC_API_KEY || "YOUR_API_KEY_HERE",
+);
+
+const requestOptions: RequestInit = {
+    method: "GET",
+    headers: headers,
+};
+
+// ─── Cache helpers ────────────────────────────────────────────────
+interface CachedData<T> {
+    data: T;
+    timestamp: number;
+}
+
+async function getFromCache<T>(key: string, ttl: number): Promise<T | null> {
+    try {
+        const raw = await AsyncStorage.getItem(key);
+        if (!raw) return null;
+        const cached: CachedData<T> = JSON.parse(raw);
+        if (Date.now() - cached.timestamp > ttl) return null;
+        return cached.data;
+    } catch {
+        return null;
+    }
+}
+
+async function setInCache<T>(key: string, data: T): Promise<void> {
+    try {
+        const entry: CachedData<T> = { data, timestamp: Date.now() };
+        await AsyncStorage.setItem(key, JSON.stringify(entry));
+    } catch {
+        // Silently fail — cache is non-critical
+    }
 }
 
 export const useLocationData = (
@@ -14,43 +59,59 @@ export const useLocationData = (
     const [countries, setCountries] = useState<LocationOption[]>([]);
     const [states, setStates] = useState<LocationOption[]>([]);
     const [cities, setCities] = useState<LocationOption[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingCountries, setIsLoadingCountries] = useState(false);
+    const [isLoadingStates, setIsLoadingStates] = useState(false);
+    const [isLoadingCities, setIsLoadingCities] = useState(false);
 
-    // Set up API headers (Ideally, store this key in an .env file)
-    const headers = new Headers();
-    headers.append(
-        "X-CSCAPI-KEY",
-        process.env.EXPO_PUBLIC_CSC_API_KEY || "YOUR_API_KEY_HERE",
-    );
+    // Abort controllers for cancelling stale requests
+    const statesAbortRef = useRef<AbortController | null>(null);
+    const citiesAbortRef = useRef<AbortController | null>(null);
 
-    const requestOptions = {
-        method: "GET",
-        headers: headers,
-    };
-
-    // 1. Fetch Countries on Mount
+    // 1. Fetch Countries on Mount (with cache)
     useEffect(() => {
+        let cancelled = false;
+
         const fetchCountries = async () => {
-            setIsLoading(true);
+            setIsLoadingCountries(true);
+
+            // Try cache first
+            const cached = await getFromCache<LocationOption[]>(
+                CACHE_KEY_COUNTRIES,
+                COUNTRIES_TTL,
+            );
+            if (cached && !cancelled) {
+                setCountries(cached);
+                setIsLoadingCountries(false);
+                return;
+            }
+
+            // Fetch from API
             try {
                 const response = await fetch(
                     "https://api.countrystatecity.in/v1/countries",
                     requestOptions,
                 );
                 const data = await response.json();
-                const formatted = data.map((c: any) => ({
+                const formatted: LocationOption[] = data.map((c: any) => ({
                     value: c.name,
                     label: c.name,
                     isoCode: c.iso2,
                 }));
-                setCountries(formatted);
+                if (!cancelled) {
+                    setCountries(formatted);
+                    setInCache(CACHE_KEY_COUNTRIES, formatted);
+                }
             } catch (error) {
                 console.error("Error fetching countries:", error);
             } finally {
-                setIsLoading(false);
+                if (!cancelled) setIsLoadingCountries(false);
             }
         };
         fetchCountries();
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     // 2. Derive Country ISO Code
@@ -61,35 +122,62 @@ export const useLocationData = (
         );
     }, [selectedCountryName, countries]);
 
-    // 3. Fetch States when Country changes
+    // 3. Fetch States when Country changes (with cache)
     useEffect(() => {
         if (!selectedCountryIso) {
             setStates([]);
-            setCities([]); // Clear cities if country is cleared
+            setCities([]);
             return;
         }
 
+        // Cancel previous states request
+        statesAbortRef.current?.abort();
+        const abortController = new AbortController();
+        statesAbortRef.current = abortController;
+
         const fetchStates = async () => {
-            setIsLoading(true);
+            setIsLoadingStates(true);
+
+            // Try cache first
+            const cacheKey = `${CACHE_KEY_STATES_PREFIX}${selectedCountryIso}`;
+            const cached = await getFromCache<LocationOption[]>(
+                cacheKey,
+                STATES_TTL,
+            );
+            if (cached && !abortController.signal.aborted) {
+                setStates(cached);
+                setIsLoadingStates(false);
+                return;
+            }
+
             try {
                 const response = await fetch(
                     `https://api.countrystatecity.in/v1/countries/${selectedCountryIso}/states`,
-                    requestOptions,
+                    { ...requestOptions, signal: abortController.signal },
                 );
                 const data = await response.json();
-                const formatted = data.map((s: any) => ({
+                const formatted: LocationOption[] = data.map((s: any) => ({
                     value: s.name,
                     label: s.name,
                     isoCode: s.iso2,
                 }));
-                setStates(formatted);
+                if (!abortController.signal.aborted) {
+                    setStates(formatted);
+                    setInCache(cacheKey, formatted);
+                }
             } catch (error) {
-                console.error("Error fetching states:", error);
+                if ((error as Error).name !== "AbortError") {
+                    console.error("Error fetching states:", error);
+                }
             } finally {
-                setIsLoading(false);
+                if (!abortController.signal.aborted) setIsLoadingStates(false);
             }
         };
         fetchStates();
+
+        return () => {
+            abortController.abort();
+        };
     }, [selectedCountryIso]);
 
     // 4. Derive State ISO Code
@@ -104,27 +192,46 @@ export const useLocationData = (
             return;
         }
 
+        // Cancel previous cities request
+        citiesAbortRef.current?.abort();
+        const abortController = new AbortController();
+        citiesAbortRef.current = abortController;
+
         const fetchCities = async () => {
-            setIsLoading(true);
+            setIsLoadingCities(true);
             try {
                 const response = await fetch(
                     `https://api.countrystatecity.in/v1/countries/${selectedCountryIso}/states/${selectedStateIso}/cities`,
-                    requestOptions,
+                    { ...requestOptions, signal: abortController.signal },
                 );
                 const data = await response.json();
-                const formatted = data.map((c: any) => ({
+                const formatted: LocationOption[] = data.map((c: any) => ({
                     value: c.name,
                     label: c.name,
                 }));
-                setCities(formatted);
+                if (!abortController.signal.aborted) setCities(formatted);
             } catch (error) {
-                console.error("Error fetching cities:", error);
+                if ((error as Error).name !== "AbortError") {
+                    console.error("Error fetching cities:", error);
+                }
             } finally {
-                setIsLoading(false);
+                if (!abortController.signal.aborted) setIsLoadingCities(false);
             }
         };
         fetchCities();
+
+        return () => {
+            abortController.abort();
+        };
     }, [selectedCountryIso, selectedStateIso]);
 
-    return { countries, states, cities, isLoading };
+    return {
+        countries,
+        states,
+        cities,
+        isLoadingCountries,
+        isLoadingStates,
+        isLoadingCities,
+        isLoading: isLoadingCountries || isLoadingStates || isLoadingCities,
+    };
 };
