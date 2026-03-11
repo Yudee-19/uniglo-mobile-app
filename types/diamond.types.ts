@@ -163,7 +163,7 @@ export const SHAPE_IMAGES: Record<string, any> = {
     EM: require("@/assets/shapes/emerald-diamond.png"),
     MQ: require("@/assets/shapes/marquise-diamond.png"),
     HT: require("@/assets/shapes/heart.png"),
-    Other: require("@/assets/shapes/radiant-diamond.png"),
+    Other: require("@/assets/shapes/other-diamond.png"),
     Asscher: require("@/assets/shapes/asscher-diamond.png"),
     CU: require("@/assets/shapes/cushion-diamond.png"),
     OMB: require("@/assets/shapes/old-mine-diamond.png"),
