@@ -1,7 +1,11 @@
 import { CURRENCIES } from "@/constants/currency";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationData } from "@/hooks/useLocationData";
-import { registerUser } from "@/services/authServices";
+import {
+    checkPendingRegistration,
+    registerUser,
+    resendRegistrationOtp,
+} from "@/services/authServices";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
@@ -307,6 +311,35 @@ export default function RegisterScreen() {
         setIsLoading(true);
 
         try {
+            // Check if user already has a pending registration
+            const pendingCheck = await checkPendingRegistration(formData.email);
+
+            if (pendingCheck.hasPendingRegistration) {
+                // User has pending registration, resend OTP
+                const resendResponse = await resendRegistrationOtp(
+                    formData.email,
+                );
+
+                Alert.alert(
+                    "Success",
+                    resendResponse.message ||
+                        "OTP resent successfully! Please verify your email.",
+                    [
+                        {
+                            text: "OK",
+                            onPress: () => {
+                                router.push({
+                                    pathname: "/verify-otp",
+                                    params: { email: formData.email },
+                                });
+                            },
+                        },
+                    ],
+                );
+
+                return;
+            }
+
             const registrationData = {
                 username: formData.username,
                 email: formData.email,
@@ -380,16 +413,15 @@ export default function RegisterScreen() {
             };
 
             const response = await registerUser(registrationData);
-            console.log("Registration Response:", response);
 
             Alert.alert(
                 "Success",
-                response.message || "Registration successful!",
+                response.message ||
+                    "Registration successful! Please verify your email with OTP.",
                 [
                     {
                         text: "OK",
                         onPress: () => {
-                            // Navigate to OTP verification with email as parameter
                             router.push({
                                 pathname: "/verify-otp",
                                 params: { email: formData.email },
@@ -399,34 +431,7 @@ export default function RegisterScreen() {
                 ],
             );
         } catch (error) {
-            const errorMessage = error as string;
-            if (
-                errorMessage.toLowerCase().includes("pending") &&
-                (errorMessage.toLowerCase().includes("registration") ||
-                    errorMessage.toLowerCase().includes("otp"))
-            ) {
-                Alert.alert(
-                    "Pending Verification",
-                    "You already have a pending registration. Please verify your email with the OTP sent to you.",
-                    [
-                        {
-                            text: "Cancel",
-                            style: "cancel",
-                        },
-                        {
-                            text: "Verify Now",
-                            onPress: () => {
-                                router.push({
-                                    pathname: "/verify-otp",
-                                    params: { email: formData.email },
-                                });
-                            },
-                        },
-                    ],
-                );
-            } else {
-                Alert.alert("Error", errorMessage);
-            }
+            Alert.alert("Error", error as string);
         } finally {
             setIsLoading(false);
         }

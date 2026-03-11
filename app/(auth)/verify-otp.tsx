@@ -1,6 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
-import { verifyOtp } from "@/services/authServices";
-import { sendOtp } from "@/services/otpServices";
+import { resendRegistrationOtp, verifyOtp } from "@/services/authServices";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
@@ -107,7 +106,7 @@ export default function VerifyOtpScreen() {
         setIsResending(true);
 
         try {
-            const response = await sendOtp(email as string);
+            const response = await resendRegistrationOtp(email as string);
             Alert.alert(
                 "Success",
                 response.message || "OTP has been resent to your email",

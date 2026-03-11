@@ -122,6 +122,15 @@ export interface VerifyOtpResponseData {
     token?: string;
 }
 
+export interface CheckPendingRegistrationResponse {
+    hasPendingRegistration: boolean;
+}
+
+export interface ResendRegistrationOtpResponse {
+    success: boolean;
+    message: string;
+}
+
 export const loginUser = async (
     email: string,
     password: string,
@@ -226,6 +235,42 @@ export const verifyOtp = async (
         throw (
             axiosError.response?.data?.message ||
             "Invalid OTP. Please try again."
+        );
+    }
+};
+
+export const checkPendingRegistration = async (
+    email: string,
+): Promise<CheckPendingRegistrationResponse> => {
+    try {
+        const response = await apiClient.get<CheckPendingRegistrationResponse>(
+            "/users/check-pending-registration",
+            { params: { email } },
+        );
+        return response.data;
+    } catch (error) {
+        const axiosError = error as AxiosError<ApiErrorResponse>;
+        throw (
+            axiosError.response?.data?.message ||
+            "Failed to check pending registration. Please try again."
+        );
+    }
+};
+
+export const resendRegistrationOtp = async (
+    email: string,
+): Promise<ResendRegistrationOtpResponse> => {
+    try {
+        const response = await apiClient.post<ResendRegistrationOtpResponse>(
+            "/users/resend-registration-otp",
+            { email },
+        );
+        return response.data;
+    } catch (error) {
+        const axiosError = error as AxiosError<ApiErrorResponse>;
+        throw (
+            axiosError.response?.data?.message ||
+            "Failed to resend OTP. Please try again."
         );
     }
 };
