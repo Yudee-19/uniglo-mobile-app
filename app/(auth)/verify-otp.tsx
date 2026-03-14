@@ -24,7 +24,15 @@ export default function VerifyOtpScreen() {
     const [isResending, setIsResending] = useState(false);
     const [otp, setOtp] = useState(["", "", "", ""]);
     const inputRefs = useRef<(TextInput | null)[]>([]);
+    const [cooldown, setCooldown] = useState(30);
 
+    // Add this useEffect to handle the countdown
+    useEffect(() => {
+        if (cooldown > 0) {
+            const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [cooldown]);
     useEffect(() => {
         if (!email) {
             Alert.alert("Error", "Email not found. Please register again.", [
@@ -113,6 +121,7 @@ export default function VerifyOtpScreen() {
             );
             // Clear existing OTP
             setOtp(["", "", "", ""]);
+            setCooldown(30);
             inputRefs.current[0]?.focus();
         } catch (error) {
             Alert.alert("Error", error as string);
@@ -221,7 +230,7 @@ export default function VerifyOtpScreen() {
                         </Text>
                         <TouchableOpacity
                             onPress={handleResendOtp}
-                            disabled={isLoading || isResending}
+                            disabled={isLoading || isResending || cooldown > 0} // Disable if cooldown > 0
                         >
                             {isResending ? (
                                 <View className="flex-row items-center gap-2">
@@ -233,6 +242,10 @@ export default function VerifyOtpScreen() {
                                         Sending...
                                     </Text>
                                 </View>
+                            ) : cooldown > 0 ? (
+                                <Text className="text-gray-500 text-sm font-semibold flex-row mt-1">
+                                    Resend OTP in {cooldown}s
+                                </Text>
                             ) : (
                                 <Text
                                     className={`text-[#D4AF37] text-sm font-semibold ${

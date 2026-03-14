@@ -277,6 +277,7 @@ export default function RegisterScreen() {
         phone: "",
         companyName: "",
         businessType: "",
+        vatNumber: "",
         street: "",
         state: "",
         city: "",
@@ -341,7 +342,8 @@ export default function RegisterScreen() {
                 !formData.country ||
                 !formData.state ||
                 !formData.street ||
-                !formData.zipCode
+                !formData.zipCode ||
+                !formData.vatNumber
             ) {
                 Alert.alert("Error", "Please fill in all address fields");
                 return false;
@@ -426,7 +428,7 @@ export default function RegisterScreen() {
                         state: formData.state,
                         country: formData.country,
                         zipCode: formData.zipCode,
-                        vat_No: "",
+                        vat_No: formData.vatNumber,
                         gstn_No: "",
                     },
                 ],
@@ -439,7 +441,7 @@ export default function RegisterScreen() {
                         state: formData.state,
                         country: formData.country,
                         zipCode: formData.zipCode,
-                        vat_No: "",
+                        vat_No: formData.vatNumber,
                         gstn_No: "",
                     },
                 ],
@@ -470,7 +472,7 @@ export default function RegisterScreen() {
                     businessInfo: {
                         companyName: formData.companyName,
                         businessType: formData.businessType,
-                        vatNumber: "",
+                        vatNumber: formData.vatNumber,
                         websiteUrl: "",
                     },
                 },
@@ -634,6 +636,15 @@ export default function RegisterScreen() {
                                 onSelect={(v) => update("businessType", v)}
                                 disabled={isLoading}
                             />
+                            {/* Add the VAT Number input here */}
+                            <FloatingInput
+                                label="VAT Number"
+                                value={formData.vatNumber}
+                                onChangeText={(v) => update("vatNumber", v)}
+                                autoCapitalize="characters"
+                                editable={!isLoading}
+                            />
+
                             <SelectField
                                 label="Country"
                                 value={formData.country}
