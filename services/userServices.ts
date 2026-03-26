@@ -31,6 +31,7 @@ export interface CustomerData {
     phoneNumber: string;
     landlineNumber: string;
     countryCode: string;
+    birthDate: string;
     address: {
         street: string;
         city: string;
@@ -82,6 +83,49 @@ export interface ApiErrorResponse {
 export interface ProfileResponseData {
     user: UserProfile;
 }
+
+export interface DisableAccountResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface ReactivationRequestResponse {
+    success: boolean;
+    message: string;
+}
+
+export const disableAccount = async (): Promise<DisableAccountResponse> => {
+    try {
+        const response = await apiClient.post<DisableAccountResponse>(
+            "/users/disable-account",
+        );
+        return response.data;
+    } catch (error) {
+        const axiosError = error as AxiosError<ApiErrorResponse>;
+        throw (
+            axiosError.response?.data?.message ||
+            "Failed to disable account. Please try again."
+        );
+    }
+};
+
+export const requestReactivation = async (
+    email: string,
+): Promise<ReactivationRequestResponse> => {
+    try {
+        const response = await apiClient.post<ReactivationRequestResponse>(
+            "/users/reactivation-request",
+            { email },
+        );
+        return response.data;
+    } catch (error) {
+        const axiosError = error as AxiosError<ApiErrorResponse>;
+        throw (
+            axiosError.response?.data?.message ||
+            "Failed to submit reactivation request. Please try again."
+        );
+    }
+};
 
 export const getUserProfile = async (): Promise<
     ApiSuccessResponse<ProfileResponseData>

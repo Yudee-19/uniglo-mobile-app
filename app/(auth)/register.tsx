@@ -9,6 +9,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
+import DateTimePicker, {
+    DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import React, { useCallback, useMemo, useState } from "react";
 import {
     ActivityIndicator,
@@ -268,6 +271,7 @@ export default function RegisterScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [formData, setFormData] = useState({
         username: "",
         firstName: "",
@@ -275,6 +279,7 @@ export default function RegisterScreen() {
         email: "",
         countryCode: "",
         phone: "",
+        birthDate: "",
         companyName: "",
         businessType: "",
         vatNumber: "",
@@ -462,6 +467,7 @@ export default function RegisterScreen() {
                     phoneNumber: formData.phone,
                     landlineNumber: "",
                     countryCode: formData.countryCode,
+                    birthDate: formData.birthDate,
                     address: {
                         street: formData.street,
                         city: formData.city,
@@ -616,6 +622,58 @@ export default function RegisterScreen() {
                                 keyboardType="phone-pad"
                                 editable={!isLoading}
                             />
+
+                            {/* Date of Birth */}
+                            <TouchableOpacity
+                                onPress={() => setShowDatePicker(true)}
+                                activeOpacity={0.8}
+                                className="border border-gray-500 rounded-xl px-4 py-4 mb-4 flex-row items-center justify-between"
+                            >
+                                <Text
+                                    className={`text-base ${formData.birthDate ? "text-white" : "text-gray-400"}`}
+                                >
+                                    {formData.birthDate
+                                        ? `Date of Birth: ${new Date(formData.birthDate).toLocaleDateString()}`
+                                        : "Date of Birth"}
+                                </Text>
+                                <Ionicons
+                                    name="calendar-outline"
+                                    size={20}
+                                    color="#9ca3af"
+                                />
+                            </TouchableOpacity>
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    value={
+                                        formData.birthDate
+                                            ? new Date(formData.birthDate)
+                                            : new Date()
+                                    }
+                                    mode="date"
+                                    display={
+                                        Platform.OS === "ios"
+                                            ? "spinner"
+                                            : "default"
+                                    }
+                                    maximumDate={new Date()}
+                                    onChange={(
+                                        _event: DateTimePickerEvent,
+                                        selectedDate?: Date,
+                                    ) => {
+                                        setShowDatePicker(
+                                            Platform.OS === "ios",
+                                        );
+                                        if (selectedDate) {
+                                            update(
+                                                "birthDate",
+                                                selectedDate
+                                                    .toISOString()
+                                                    .split("T")[0],
+                                            );
+                                        }
+                                    }}
+                                />
+                            )}
                         </View>
                     )}
 

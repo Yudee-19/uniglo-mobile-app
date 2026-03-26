@@ -318,6 +318,20 @@ export default function LoginScreen() {
                             </Pressable>
                         </Link>
                     </View>
+
+                    {/* Reactivate Account Link */}
+                    <View className="flex-row items-center mt-4">
+                        <Text className="text-gray-400 text-sm">
+                            Account disabled?{" "}
+                        </Text>
+                        <Link href={"/reactivate-account" as any} asChild>
+                            <Pressable disabled={isLoading}>
+                                <Text className="text-white text-sm font-semibold underline">
+                                    Request reactivation
+                                </Text>
+                            </Pressable>
+                        </Link>
+                    </View>
                 </ScrollView>
             </KeyboardAvoidingView>
         </LinearGradient>

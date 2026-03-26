@@ -57,6 +57,7 @@ export interface CustomerData {
     phoneNumber: string;
     landlineNumber: string;
     countryCode: string;
+    birthDate: string;
     address: {
         street: string;
         city: string;

@@ -1,6 +1,6 @@
 import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/context/AuthContext";
-import { getUserProfile, UserProfile } from "@/services/userServices";
+import { disableAccount, getUserProfile, UserProfile } from "@/services/userServices";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -86,6 +86,7 @@ export default function ProfileScreen() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [loggingOut, setLoggingOut] = useState(false);
+    const [disablingAccount, setDisablingAccount] = useState(false);
 
     const fetchProfile = useCallback(async (silent = false) => {
         if (!silent) setLoading(true);
@@ -144,6 +145,45 @@ export default function ProfileScreen() {
                 },
             },
         ]);
+    };
+
+    const handleDisableAccount = () => {
+        Alert.alert(
+            "Disable Account",
+            "Are you sure you want to disable your account? You can request reactivation anytime by contacting our admin team.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Yes, Disable",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            setDisablingAccount(true);
+                            await disableAccount();
+                            Alert.alert(
+                                "Account Disabled",
+                                "Your account has been disabled. You can request reactivation anytime.",
+                                [
+                                    {
+                                        text: "OK",
+                                        onPress: () => logout(),
+                                    },
+                                ],
+                            );
+                        } catch (err: any) {
+                            Alert.alert(
+                                "Error",
+                                typeof err === "string"
+                                    ? err
+                                    : "Failed to disable account. Please try again.",
+                            );
+                        } finally {
+                            setDisablingAccount(false);
+                        }
+                    },
+                },
+            ],
+        );
     };
 
     return (
@@ -257,6 +297,16 @@ export default function ProfileScreen() {
                                 value={safeValue(
                                     user.customerData?.landlineNumber,
                                 )}
+                            />
+                            <InfoRow
+                                label="Birth Date"
+                                value={
+                                    user.customerData?.birthDate
+                                        ? new Date(
+                                              user.customerData.birthDate,
+                                          ).toLocaleDateString()
+                                        : "N/A"
+                                }
                             />
                             <InfoRow
                                 label="My Address"
@@ -465,6 +515,32 @@ export default function ProfileScreen() {
                                 />
                             </SectionCard>
                         )}
+
+                        {/* ── Disable Account Button ── */}
+                        <TouchableOpacity
+                            onPress={handleDisableAccount}
+                            disabled={disablingAccount}
+                            className="bg-orange-50 border border-orange-200 rounded-lg py-4 items-center flex-row justify-center gap-2 mb-3"
+                            activeOpacity={0.7}
+                        >
+                            {disablingAccount ? (
+                                <ActivityIndicator
+                                    size="small"
+                                    color="#f97316"
+                                />
+                            ) : (
+                                <>
+                                    <Ionicons
+                                        name="ban-outline"
+                                        size={20}
+                                        color="#f97316"
+                                    />
+                                    <Text className="text-orange-500 font-latoBold text-sm uppercase tracking-wide">
+                                        Disable Account
+                                    </Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
 
                         {/* ── Logout Button ── */}
                         <TouchableOpacity
