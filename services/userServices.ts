@@ -89,10 +89,30 @@ export interface DisableAccountResponse {
     message: string;
 }
 
+export interface DeleteAccountResponse {
+    success: boolean;
+    message: string;
+}
+
 export interface ReactivationRequestResponse {
     success: boolean;
     message: string;
 }
+
+export const deleteAccount = async (): Promise<DeleteAccountResponse> => {
+    try {
+        const response = await apiClient.delete<DeleteAccountResponse>(
+            "/users/delete-account",
+        );
+        return response.data;
+    } catch (error) {
+        const axiosError = error as AxiosError<ApiErrorResponse>;
+        throw (
+            axiosError.response?.data?.message ||
+            "Failed to delete account. Please try again."
+        );
+    }
+};
 
 export const disableAccount = async (): Promise<DisableAccountResponse> => {
     try {
