@@ -10,7 +10,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
     Animated,
     Dimensions,
-    FlatList,
     Image,
     Modal,
     RefreshControl,
@@ -676,32 +675,16 @@ export default function InventoryScreen() {
                         </View>
                     ) : (
                         <>
-                            <FlatList
-                                data={
-                                    loading
-                                        ? Array.from({ length: 5 })
-                                        : diamonds
-                                }
-                                keyExtractor={(item, index) =>
-                                    loading ? String(index) : (item as any)._id
-                                }
-                                renderItem={({ item }) =>
-                                    loading ? (
-                                        <DiamondCardSkeleton />
-                                    ) : (
-                                        <DiamondCard
-                                            diamond={item as any}
-                                            key={(item as any)._id}
-                                        />
-                                    )
-                                }
-                                contentContainerStyle={{
-                                    paddingHorizontal: 0,
-                                    paddingVertical: 0,
-                                }}
-                                nestedScrollEnabled
-                                scrollEnabled={false}
-                            />
+                            {loading
+                                ? Array.from({ length: 5 }).map((_, i) => (
+                                      <DiamondCardSkeleton key={i} />
+                                  ))
+                                : diamonds.map((item) => (
+                                      <DiamondCard
+                                          key={(item as any)._id ?? item.stockRef}
+                                          diamond={item}
+                                      />
+                                  ))}
                             {/* Pagination Controls */}
                             {!loading && totalCount > 0 && (
                                 <View className="flex-row justify-between items-center mt-6 mb-4">
