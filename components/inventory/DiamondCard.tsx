@@ -1,10 +1,10 @@
-import { Diamond } from "@/services/diamondService";
+import { Diamond, PublicDiamond } from "@/services/diamondService";
 import { SHAPES } from "@/types/diamond.types";
 import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 
 interface DiamondCardProps {
-    diamond: Diamond;
+    diamond: Diamond | PublicDiamond;
 }
 
 export function DiamondCard({ diamond }: DiamondCardProps) {
@@ -27,6 +27,9 @@ export function DiamondCard({ diamond }: DiamondCardProps) {
     ]
         .filter(Boolean)
         .join(" | ");
+
+    const fullDiamond = diamond as Diamond;
+    const hasPricing = "pricePerCts" in diamond && fullDiamond.pricePerCts != null;
 
     const ratio =
         diamond.length && diamond.width
@@ -103,11 +106,11 @@ export function DiamondCard({ diamond }: DiamondCardProps) {
                     <View className="flex-row">
                         <Text className="text-gray-400 text-sm w-8">LOC</Text>
                         <Text className="font-bold text-black text-sm  flex flex-col ">
-                            {diamond.country.includes(" ")
+                            {diamond.country?.includes(" ")
                                 ? diamond.country.split(" ")[0] +
                                   " " +
                                   diamond.country.split(" ")[1]
-                                : diamond.country}
+                                : diamond.country || "-"}
                         </Text>
                     </View>
                 </View>
@@ -117,26 +120,36 @@ export function DiamondCard({ diamond }: DiamondCardProps) {
 
                 {/* Column 3: Pricing */}
                 <View className="flex-[1.2]">
-                    <View className="flex-row justify-between mb-2">
-                        <Text className="text-gray-400 text-sm">$/CTS:</Text>
-                        <Text className="font-bold text-primary-purple text-sm">
-                            {diamond.pricePerCts?.toFixed(2) || "-"}
-                        </Text>
-                    </View>
-                    <View className="flex-row justify-between mb-2">
-                        <Text className="text-gray-400 text-sm">DISC(%):</Text>
-                        <Text
-                            className={`font-bold ${diamond.discPerc && diamond.discPerc < 0 ? "text-red-600" : "text-green-600"} text-sm`}
-                        >
-                            {diamond.discPerc?.toFixed(2) || "-"}
-                        </Text>
-                    </View>
-                    <View className="flex-row justify-between">
-                        <Text className="text-gray-400 text-sm">$TOTAL:</Text>
-                        <Text className="font-bold text-black text-sm">
-                            {diamond.priceListUSD?.toFixed(2) || "-"}
-                        </Text>
-                    </View>
+                    {hasPricing ? (
+                        <>
+                            <View className="flex-row justify-between mb-2">
+                                <Text className="text-gray-400 text-sm">$/CTS:</Text>
+                                <Text className="font-bold text-primary-purple text-sm">
+                                    {fullDiamond.pricePerCts?.toFixed(2) || "-"}
+                                </Text>
+                            </View>
+                            <View className="flex-row justify-between mb-2">
+                                <Text className="text-gray-400 text-sm">DISC(%):</Text>
+                                <Text
+                                    className={`font-bold ${fullDiamond.discPerc && fullDiamond.discPerc < 0 ? "text-red-600" : "text-green-600"} text-sm`}
+                                >
+                                    {fullDiamond.discPerc?.toFixed(2) || "-"}
+                                </Text>
+                            </View>
+                            <View className="flex-row justify-between">
+                                <Text className="text-gray-400 text-sm">$TOTAL:</Text>
+                                <Text className="font-bold text-black text-sm">
+                                    {fullDiamond.priceListUSD?.toFixed(2) || "-"}
+                                </Text>
+                            </View>
+                        </>
+                    ) : (
+                        <View className="flex-1 items-center justify-center">
+                            <Text className="text-xs text-gray-400 text-center">
+                                Login to{"\n"}view pricing
+                            </Text>
+                        </View>
+                    )}
                 </View>
             </View>
         </TouchableOpacity>

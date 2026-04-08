@@ -46,18 +46,6 @@ export default function TabsLayout() {
                             />
                         ),
                     }}
-                    listeners={{
-                        tabPress: (e) => {
-                            if (!isAuthenticated) {
-                                e.preventDefault();
-                                Alert.alert(
-                                    "Authentication Required",
-                                    "Please login to access Inventory",
-                                );
-                                router.push("/(auth)/login");
-                            }
-                        },
-                    }}
                 />
                 <Tabs.Screen
                     name="index"

@@ -10,6 +10,56 @@ import apiClient from "./api";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
+export interface PublicDiamond {
+    stockRef: string;
+    availability: string;
+    origin: string;
+    shape: string;
+    weight: number;
+    color: string;
+    clarity: string;
+    shade: string;
+    cutGrade: string;
+    polish: string;
+    symmetry: string;
+    fluorescenceIntensity: string;
+    fluorescenceColor: string;
+    measurements: string;
+    length: number;
+    width: number;
+    height: number;
+    depthPerc: number;
+    tablePerc: number;
+    crownAngle: number;
+    crownHeight: number;
+    pavalionAngle: number;
+    pavalionDepth: number;
+    girdle: string;
+    girdleThin: string;
+    girdlePerc: number;
+    girdleCondition: string;
+    culetSize: string;
+    culetCondition: string;
+    lab: string;
+    certIssueDate: string;
+    certComment: string;
+    laserInscription: string;
+    keyToSymbols: string[];
+    milky: string;
+    blackinclusion: string;
+    eyeClean: string;
+    enhancements: string;
+    treatment: string;
+    fancyColor: string;
+    fancyIntensity: string;
+    fancyOvertone: string;
+    country: string;
+    webLink: string;
+    videoLink: string;
+    imageUrls?: string[];
+    videoUrls?: string[];
+}
+
 export interface DiamondParams {
     page?: number;
     limit?: number;
@@ -305,12 +355,118 @@ export const searchDiamonds = async (
     }
 };
 
+export const fetchPublicDiamonds = async (
+    params: DiamondParams,
+): Promise<{
+    data: PublicDiamond[];
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+}> => {
+    try {
+        const queryParams = new URLSearchParams();
+
+        // Pagination
+        if (params.page) queryParams.append("page", params.page.toString());
+        if (params.limit) queryParams.append("limit", params.limit.toString());
+
+        // Sorting
+        if (params.sortBy) queryParams.append("sortBy", params.sortBy);
+        if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
+
+        // Filters
+        if (params.shape?.length) {
+            params.shape.forEach((s) => queryParams.append("shape", s));
+        }
+        if (params.color?.length) {
+            params.color.forEach((c) => queryParams.append("color", c));
+        }
+        if (params.clarity?.length) {
+            params.clarity.forEach((c) => queryParams.append("clarity", c));
+        }
+        if (params.cutGrade?.length) {
+            params.cutGrade.forEach((c) => queryParams.append("cutGrade", c));
+        }
+        if (params.polish?.length) {
+            params.polish.forEach((p) => queryParams.append("polish", p));
+        }
+        if (params.symmetry?.length) {
+            params.symmetry.forEach((s) => queryParams.append("symmetry", s));
+        }
+        if (params.fluorescenceIntensity?.length) {
+            params.fluorescenceIntensity.forEach((f) =>
+                queryParams.append("fluorescenceIntensity", f),
+            );
+        }
+        if (params.lab?.length) {
+            params.lab.forEach((l) => queryParams.append("lab", l));
+        }
+
+        // Ranges (no price ranges for public API)
+        if (params.minCarat !== undefined)
+            queryParams.append("weight_MIN", params.minCarat.toString());
+        if (params.maxCarat !== undefined)
+            queryParams.append("weight_MAX", params.maxCarat.toString());
+        if (params.minLength !== undefined)
+            queryParams.append("length_MIN", params.minLength.toString());
+        if (params.maxLength !== undefined)
+            queryParams.append("length_MAX", params.maxLength.toString());
+        if (params.minWidth !== undefined)
+            queryParams.append("width_MIN", params.minWidth.toString());
+        if (params.maxWidth !== undefined)
+            queryParams.append("width_MAX", params.maxWidth.toString());
+        if (params.minHeight !== undefined)
+            queryParams.append("height_MIN", params.minHeight.toString());
+        if (params.maxHeight !== undefined)
+            queryParams.append("height_MAX", params.maxHeight.toString());
+        if (params.minTable !== undefined)
+            queryParams.append("tablePerc_MIN", params.minTable.toString());
+        if (params.maxTable !== undefined)
+            queryParams.append("tablePerc_MAX", params.maxTable.toString());
+        if (params.minDepth !== undefined)
+            queryParams.append("depthPerc_MIN", params.minDepth.toString());
+        if (params.maxDepth !== undefined)
+            queryParams.append("depthPerc_MAX", params.maxDepth.toString());
+
+        // Special filters
+        if (params.isNatural !== undefined)
+            queryParams.append("isNatural", params.isNatural.toString());
+        if (params.colorType) queryParams.append("colorType", params.colorType);
+        if (params.searchTerm)
+            queryParams.append("searchTerm", params.searchTerm);
+
+        const endpoint = "/diamonds/safe";
+        console.log(
+            `Making public API request to: ${API_BASE_URL}${endpoint}?${queryParams.toString()}`,
+        );
+        const response = await apiClient.get<ApiResponse<PublicDiamond>>(
+            `${API_BASE_URL}${endpoint}?${queryParams.toString()}`,
+        );
+
+        return {
+            data: response.data.data,
+            totalCount: response.data.pagination.totalRecords,
+            currentPage: response.data.pagination.currentPage,
+            totalPages: response.data.pagination.totalPages,
+            hasNextPage: response.data.pagination.hasNextPage,
+            hasPrevPage: response.data.pagination.hasPrevPage,
+        };
+    } catch (error) {
+        console.error("Error fetching public diamonds:", error);
+        throw error;
+    }
+};
+
 export const fetchDiamondById = async (
     id: string,
-): Promise<{ diamond: Diamond; similarDiamonds: string[] }> => {
+    isPublic: boolean = false,
+): Promise<{ diamond: Diamond | PublicDiamond; similarDiamonds: string[] }> => {
     try {
-        const response = await apiClient.get<ApiResponse<Diamond>>(
-            `${API_BASE_URL}/diamonds/search?searchTerm=${encodeURIComponent(id)}`,
+        const endpoint = isPublic ? "/diamonds/safe" : "/diamonds/search";
+        const response = await apiClient.get<ApiResponse<Diamond | PublicDiamond>>(
+            `${API_BASE_URL}${endpoint}?searchTerm=${encodeURIComponent(id)}`,
         );
         const result = response.data;
 

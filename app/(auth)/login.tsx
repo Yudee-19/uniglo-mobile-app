@@ -332,6 +332,18 @@ export default function LoginScreen() {
                             </Pressable>
                         </Link>
                     </View>
+
+                    {/* Skip / Continue as Guest */}
+                    <TouchableOpacity
+                        onPress={() => router.replace("/(tabs)")}
+                        activeOpacity={0.7}
+                        disabled={isLoading}
+                        className="mt-8 items-center"
+                    >
+                        <Text className="text-gray-400 text-sm underline">
+                            Continue as Guest
+                        </Text>
+                    </TouchableOpacity>
                 </ScrollView>
             </KeyboardAvoidingView>
         </LinearGradient>

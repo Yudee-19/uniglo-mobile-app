@@ -2,7 +2,7 @@ import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/context/AuthContext";
 import { deleteAccount, disableAccount, getUserProfile, UserProfile } from "@/services/userServices";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -83,7 +83,7 @@ function ProfileSkeleton() {
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
-    const { logout } = useAuth();
+    const { logout, isAuthenticated } = useAuth();
     const [user, setUser] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -254,6 +254,10 @@ export default function ProfileScreen() {
             ],
         );
     };
+
+    if (!isAuthenticated) {
+        return <Redirect href="/(auth)/login" />;
+    }
 
     return (
         <SafeAreaView className="flex-1 bg-white">

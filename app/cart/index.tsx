@@ -1,5 +1,6 @@
 import { DiamondCardSkeleton } from "@/components/inventory/DiamondCardSkeleton";
 import { AppHeader } from "@/components/shared/AppHeader";
+import { useAuth } from "@/context/AuthContext";
 import {
     CartItem,
     clearCart,
@@ -10,7 +11,7 @@ import {
 import { Diamond } from "@/services/diamondService";
 import { SHAPES } from "@/types/diamond.types";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
@@ -305,6 +306,7 @@ function SwipeableCartCard({
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
 export default function CartScreen() {
+    const { isAuthenticated } = useAuth();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -447,6 +449,10 @@ export default function CartScreen() {
             ],
         );
     };
+
+    if (!isAuthenticated) {
+        return <Redirect href="/(auth)/login" />;
+    }
 
     return (
         <SafeAreaView className="flex-1">

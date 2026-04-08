@@ -1,7 +1,8 @@
 import { AppHeader } from "@/components/shared/AppHeader";
 import { DiamondImage } from "@/components/shared/DiamondMedia";
+import { useAuth } from "@/context/AuthContext";
 import { addToCart, holdDiamond } from "@/services/cartServices";
-import { Diamond, fetchDiamondById } from "@/services/diamondService";
+import { Diamond, PublicDiamond, fetchDiamondById } from "@/services/diamondService";
 import { createDiamondInquiry } from "@/services/inquiryServices";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -110,8 +111,9 @@ function DiamondDetailSkeleton() {
 export default function DiamondDetailScreen() {
     const { stockref } = useLocalSearchParams<{ stockref: string }>();
     const router = useRouter();
+    const { isAuthenticated } = useAuth();
 
-    const [diamond, setDiamond] = useState<Diamond | null>(null);
+    const [diamond, setDiamond] = useState<Diamond | PublicDiamond | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [addingToCart, setAddingToCart] = useState(false);
@@ -131,6 +133,7 @@ export default function DiamondDetailScreen() {
             try {
                 const result = await fetchDiamondById(
                     decodeURIComponent(stockref),
+                    !isAuthenticated,
                 );
                 setDiamond(result.diamond);
             } catch (err) {
@@ -140,7 +143,7 @@ export default function DiamondDetailScreen() {
             }
         };
         loadDiamond();
-    }, [stockref]);
+    }, [stockref, isAuthenticated]);
 
     // Animate inquiry modal
     useEffect(() => {
@@ -160,11 +163,29 @@ export default function DiamondDetailScreen() {
         }
     }, [showInquiryModal]);
 
+    const promptLogin = (action: string) => {
+        Alert.alert(
+            "Login Required",
+            `Please login to ${action}.`,
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Login",
+                    onPress: () => router.push("/(auth)/login"),
+                },
+            ],
+        );
+    };
+
     const handleAddToCart = async () => {
-        if (!diamond?._id) return;
+        if (!isAuthenticated) {
+            promptLogin("add diamonds to cart");
+            return;
+        }
+        if (!(diamond as Diamond)?._id) return;
         setAddingToCart(true);
         try {
-            await addToCart([diamond._id]);
+            await addToCart([(diamond as Diamond)._id]);
             Alert.alert("Success", "Diamond added to cart successfully!");
         } catch (err) {
             Alert.alert(
@@ -179,6 +200,10 @@ export default function DiamondDetailScreen() {
     };
 
     const handleHoldDiamond = async () => {
+        if (!isAuthenticated) {
+            promptLogin("hold diamonds");
+            return;
+        }
         if (!diamond?.stockRef) return;
         setHoldingDiamond(true);
         try {
@@ -195,6 +220,10 @@ export default function DiamondDetailScreen() {
     };
 
     const handleSubmitInquiry = async () => {
+        if (!isAuthenticated) {
+            promptLogin("make an inquiry");
+            return;
+        }
         if (!inquiryText.trim() || !diamond?.stockRef) return;
 
         setSubmittingInquiry(true);
@@ -302,10 +331,17 @@ export default function DiamondDetailScreen() {
                         </View>
 
                         {/* ── Price ── */}
-                        {diamond.priceListUSD ? (
+                        {isAuthenticated && (diamond as Diamond).priceListUSD ? (
                             <View className="flex-row items-baseline gap-2 mb-4">
                                 <Text className="text-lg font-latoBold text-gray-900">
-                                    ${diamond.priceListUSD.toLocaleString()} USD
+                                    ${(diamond as Diamond).priceListUSD.toLocaleString()} USD
+                                </Text>
+                            </View>
+                        ) : !isAuthenticated ? (
+                            <View className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 mb-4 flex-row items-center gap-2">
+                                <Ionicons name="lock-closed-outline" size={16} color="#9CA3AF" />
+                                <Text className="text-sm text-gray-500 font-lato">
+                                    Login to view pricing
                                 </Text>
                             </View>
                         ) : null}
@@ -386,7 +422,13 @@ export default function DiamondDetailScreen() {
                         <TouchableOpacity
                             className="bg-white border-2 border-[#26062b] py-3 rounded-sm items-center mb-5 flex-row justify-center gap-2"
                             activeOpacity={0.85}
-                            onPress={() => setShowInquiryModal(true)}
+                            onPress={() => {
+                                if (!isAuthenticated) {
+                                    promptLogin("make an inquiry");
+                                    return;
+                                }
+                                setShowInquiryModal(true);
+                            }}
                         >
                             <Ionicons
                                 name="chatbubble-ellipses-outline"
@@ -403,14 +445,18 @@ export default function DiamondDetailScreen() {
                             title="Details"
                             rows={[
                                 { label: "Stock No", value: diamond.stockRef },
-                                { label: "Report No", value: diamond.certiNo },
+                                ...(isAuthenticated
+                                    ? [{ label: "Report No", value: (diamond as Diamond).certiNo }]
+                                    : []),
                                 { label: "Lab", value: diamond.lab },
-                                {
-                                    label: "Price/Carat",
-                                    value: diamond.pricePerCts
-                                        ? `$${diamond.pricePerCts.toLocaleString()}`
-                                        : "-",
-                                },
+                                ...(isAuthenticated
+                                    ? [{
+                                        label: "Price/Carat",
+                                        value: (diamond as Diamond).pricePerCts
+                                            ? `$${(diamond as Diamond).pricePerCts.toLocaleString()}`
+                                            : "-",
+                                    }]
+                                    : []),
                                 { label: "Shape", value: diamond.shape },
                                 { label: "Carat", value: diamond.weight },
                                 { label: "Color", value: diamond.color },

@@ -3,7 +3,18 @@
     "allow": [
       "Bash(ls:*)",
       "Bash(npx expo:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(find D:Projectsuniglow-frontend -type f -name *diamond*)",
+      "Bash(find D:Projectsuniglow-frontend -path */api/diamonds* -type f)",
+      "Bash(find D:Projectsuniglow-frontend/src/app -type f -name route.*)",
+      "Bash(find D:Projectsuniglo -type f -name *diamond*)",
+      "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
+      "Bash(find D:Projectsuniglow-frontend -type f \\\\\\(-name *route* -o -path */api/* \\\\\\))",
+      "Bash(find D:ProjectsUniglo -type f \\\\\\(-name *.ts -o -name *.js \\\\\\) -path *diamond*)",
+      "Bash(find D:Projectsuniglow-frontend -name .env* -o -name *.env*)"
+    ],
+    "additionalDirectories": [
+      "D:\\Projects\\uniglow-frontend"
     ]
   }
 }

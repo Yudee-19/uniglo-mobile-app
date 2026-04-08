@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, usePathname } from "expo-router";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 
 export function AppHeader() {
     const { isAuthenticated, loading: authLoading } = useAuth();
@@ -9,6 +9,24 @@ export function AppHeader() {
 
     const isCartActive = pathname.startsWith("/cart");
     const isProfileActive = pathname.startsWith("/profile");
+
+    const handleProtectedNavigation = (route: "/cart" | "/profile", label: string) => {
+        if (!isAuthenticated) {
+            Alert.alert(
+                "Login Required",
+                `Please login to access ${label}.`,
+                [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                        text: "Login",
+                        onPress: () => router.push("/(auth)/login"),
+                    },
+                ],
+            );
+            return;
+        }
+        router.push(route);
+    };
 
     return (
         <View className="flex-row items-center justify-between px-4 py-3 bg-white">
@@ -26,12 +44,9 @@ export function AppHeader() {
             {/* Right - Cart & Profile */}
             <View className="flex-row items-center gap-4">
                 <TouchableOpacity
-                    onPress={() => router.push("/cart")}
-                    className={
-                        "w-9 h-9 items-center justify-center " +
-                        (authLoading || !isAuthenticated ? "opacity-50" : "")
-                    }
-                    disabled={authLoading || !isAuthenticated}
+                    onPress={() => handleProtectedNavigation("/cart", "Cart")}
+                    className="w-9 h-9 items-center justify-center"
+                    disabled={authLoading}
                 >
                     <Ionicons
                         name={isCartActive ? "cart" : "cart-outline"}
@@ -40,12 +55,9 @@ export function AppHeader() {
                     />
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={() => router.push("/profile")}
-                    className={
-                        "w-9 h-9 items-center justify-center " +
-                        (authLoading || !isAuthenticated ? "opacity-50" : "")
-                    }
-                    disabled={authLoading || !isAuthenticated}
+                    onPress={() => handleProtectedNavigation("/profile", "Profile")}
+                    className="w-9 h-9 items-center justify-center"
+                    disabled={authLoading}
                 >
                     <Ionicons
                         name={isProfileActive ? "person" : "person-outline"}

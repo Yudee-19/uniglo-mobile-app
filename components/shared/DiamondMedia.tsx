@@ -1,4 +1,4 @@
-import { Diamond } from "@/services/diamondService";
+import { Diamond, PublicDiamond } from "@/services/diamondService";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
@@ -11,7 +11,7 @@ import {
 import { WebView } from "react-native-webview";
 
 interface DiamondImageProps {
-    diamond?: Diamond;
+    diamond?: Diamond | PublicDiamond;
     showdefault?: boolean;
     showVideo?: boolean;
     showCarousel?: boolean;

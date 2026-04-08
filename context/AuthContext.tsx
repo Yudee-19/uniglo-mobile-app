@@ -109,15 +109,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const inAuthGroup = segments[0] === "(auth)";
 
-        if (!user && !inAuthGroup) {
-            // User is NOT logged in -> send to login
-            router.replace("/(auth)/login");
-        } else if (user) {
+        if (user) {
             // User IS logged in.
             // If they are on the login screens OR at the blank root screen, push to tabs.
             if (inAuthGroup || pathname === "/") {
                 router.replace("/(tabs)");
             }
+        } else if (!user && pathname === "/") {
+            // Not logged in and at root — go to tabs (home is public)
+            router.replace("/(tabs)");
         }
     }, [user, loading, segments, pathname, navigationState?.key]);
 

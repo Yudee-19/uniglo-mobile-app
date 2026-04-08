@@ -5,7 +5,7 @@ import { useDiamondFilters } from "@/hooks/useDiamondFilters";
 import { CLARITIES, COLORS, SHAPES, SHAPE_IMAGES } from "@/types/diamond.types";
 import { Fontisto, Ionicons } from "@expo/vector-icons";
 import { Slider } from "@miblanchard/react-native-slider";
-import { Redirect, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
     Animated,
@@ -21,16 +21,40 @@ import {
     View,
 } from "react-native";
 
-const SORT_OPTIONS = [
-    { label: "Recent", value: "recent" },
-    { label: "Carat: Low to High", value: "weight-asc" },
-    { label: "Carat: High to Low", value: "weight-desc" },
-    { label: "List Price: Low to High", value: "priceListUSD-asc" },
-    { label: "List Price: High to Low", value: "priceListUSD-desc" },
-    { label: "Price Per Carat: Low to High", value: "pricePerCts-asc" },
-    { label: "Price Per Carat: High to Low", value: "pricePerCts-desc" },
-    { label: "Discount: Low to High", value: "discPerc-asc" },
-    { label: "Discount: High to Low", value: "discPerc-desc" },
+const ALL_SORT_OPTIONS = [
+    { label: "Recent", value: "recent", requiresAuth: false },
+    { label: "Carat: Low to High", value: "weight-asc", requiresAuth: false },
+    { label: "Carat: High to Low", value: "weight-desc", requiresAuth: false },
+    {
+        label: "List Price: Low to High",
+        value: "priceListUSD-asc",
+        requiresAuth: true,
+    },
+    {
+        label: "List Price: High to Low",
+        value: "priceListUSD-desc",
+        requiresAuth: true,
+    },
+    {
+        label: "Price Per Carat: Low to High",
+        value: "pricePerCts-asc",
+        requiresAuth: true,
+    },
+    {
+        label: "Price Per Carat: High to Low",
+        value: "pricePerCts-desc",
+        requiresAuth: true,
+    },
+    {
+        label: "Discount: Low to High",
+        value: "discPerc-asc",
+        requiresAuth: true,
+    },
+    {
+        label: "Discount: High to Low",
+        value: "discPerc-desc",
+        requiresAuth: true,
+    },
 ];
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -209,9 +233,9 @@ export default function InventoryScreen() {
         );
     };
 
-    if (!isAuthenticated) {
-        return <Redirect href="/(auth)/login" />;
-    }
+    const SORT_OPTIONS = ALL_SORT_OPTIONS.filter(
+        (opt) => !opt.requiresAuth || isAuthenticated,
+    );
 
     return (
         <View className="flex-1 ">
@@ -665,7 +689,10 @@ export default function InventoryScreen() {
                                     loading ? (
                                         <DiamondCardSkeleton />
                                     ) : (
-                                        <DiamondCard diamond={item as any} />
+                                        <DiamondCard
+                                            diamond={item as any}
+                                            key={(item as any)._id}
+                                        />
                                     )
                                 }
                                 contentContainerStyle={{
