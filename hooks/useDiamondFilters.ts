@@ -172,6 +172,8 @@ export const useDiamondFilters = () => {
         setLoading(true);
         try {
             const params = buildParams();
+            const endpoint = isAuthenticated ? "/diamonds/search" : "/diamonds/safe";
+            console.log(`[DiamondFilters] API: ${endpoint}`, JSON.stringify(params, null, 2));
             const result = isAuthenticated
                 ? await searchDiamonds(params)
                 : await fetchPublicDiamonds(params);

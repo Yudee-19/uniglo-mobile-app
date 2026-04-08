@@ -11,6 +11,7 @@ export type DiamondShape =
     | "Asscher" // Asscher
     | "OEB" // European
     | "OMB" // Old Mine
+    | "SE" // Square Emerald
     | "Other"; // Other
 
 export type DiamondColor =
@@ -103,6 +104,7 @@ export const SHAPES: { value: DiamondShape; label: string }[] = [
     { value: "Asscher", label: "Asscher" },
     { value: "OEB", label: "European" },
     { value: "OMB", label: "Old Mine" },
+    { value: "SE", label: "Square Emerald" },
     { value: "Other", label: "Other" },
 ];
 
@@ -110,7 +112,6 @@ export const COLORS: DiamondColor[] = [
     "D",
     "E",
     "F",
-    "E-F",
     "G",
     "H",
     "I",
@@ -131,13 +132,6 @@ export const COLORS: DiamondColor[] = [
     "X",
     "Y",
     "Z",
-    "N-O",
-    "OP",
-    "QR",
-    "ST",
-    "UV",
-    "WX",
-    "YZ",
 ];
 
 export const CLARITIES: DiamondClarity[] = [
@@ -168,4 +162,5 @@ export const SHAPE_IMAGES: Record<string, any> = {
     CU: require("@/assets/shapes/cushion-diamond.png"),
     OMB: require("@/assets/shapes/old-mine-diamond.png"),
     OEB: require("@/assets/shapes/old-european-diamond.png"),
+    SE: require("@/assets/shapes/square-emerald-diamond.png"),
 };
