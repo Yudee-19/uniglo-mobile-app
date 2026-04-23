@@ -52,3 +52,4 @@ Join our community of developers creating universal apps.
 to build
 $ eas build --platform android --profile preview
 eas submit --platform ios
+eas build --platform ios --profile production
